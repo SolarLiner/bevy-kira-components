@@ -19,7 +19,8 @@ const NUM_COMMANDS: DiagnosticPath = DiagnosticPath::const_new("kira::manager::n
 const NUM_SOUNDS: DiagnosticPath = DiagnosticPath::const_new("kira::manager::num_sounds");
 const NUM_CLOCKS: DiagnosticPath = DiagnosticPath::const_new("kira::manager::num_clocks");
 const NUM_MODULATORS: DiagnosticPath = DiagnosticPath::const_new("kira::manager::num_modulators");
-const NUM_SPATIAL_SCENES: DiagnosticPath = DiagnosticPath::const_new("kira::manager::num_spatial_scenes");
+const NUM_SPATIAL_SCENES: DiagnosticPath =
+    DiagnosticPath::const_new("kira::manager::num_spatial_scenes");
 
 fn record_diagnostics(audio_world: Res<AudioWorld>, mut diagnostics: Diagnostics) {
     diagnostics.add_measurement(&NUM_COMMANDS, || {
@@ -30,5 +31,7 @@ fn record_diagnostics(audio_world: Res<AudioWorld>, mut diagnostics: Diagnostics
     diagnostics.add_measurement(&NUM_MODULATORS, || {
         audio_world.audio_manager.num_modulators() as _
     });
-    diagnostics.add_measurement(&NUM_SPATIAL_SCENES, || audio_world.audio_manager.num_spatial_scenes() as _);
+    diagnostics.add_measurement(&NUM_SPATIAL_SCENES, || {
+        audio_world.audio_manager.num_spatial_scenes() as _
+    });
 }

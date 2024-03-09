@@ -1,4 +1,3 @@
-use bevy::diagnostic::LogDiagnosticsPlugin;
 use bevy::prelude::*;
 
 use bevy_kira_components::kira::sound::Region;
