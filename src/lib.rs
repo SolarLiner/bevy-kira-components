@@ -2,30 +2,29 @@ mod backend;
 pub mod commands;
 mod diagnostics;
 mod loader;
-mod manager;
 pub mod spatial;
 pub mod tracks;
 
 
-
+use std::collections::BTreeMap;
 use std::io::Cursor;
 
 
 use bevy::prelude::*;
 
-use kira::manager::AudioManagerSettings;
-use kira::sound::static_sound::{StaticSoundData, StaticSoundSettings};
+use kira::manager::{AudioManager, AudioManagerSettings};
+use kira::sound::static_sound::{StaticSoundData, StaticSoundHandle, StaticSoundSettings};
 
 use kira::tween::Tween;
 
-use crate::backend::{AudioBackend};
+use crate::backend::AudioBackend;
 use crate::loader::AudioLoader;
-use crate::manager::{AudioManager, RawAudioHandle};
 pub use kira;
-use kira::sound::streaming::{StreamingSoundData, StreamingSoundSettings};
-use manager::HandleId;
+use kira::sound::streaming::{StreamingSoundData, StreamingSoundHandle, StreamingSoundSettings};
 use std::path::PathBuf;
 use std::sync::Arc;
+use kira::track::TrackHandle;
+use kira::sound::FromFileError;
 
 use crate::diagnostics::KiraStatisticsDiagnosticPlugin;
 use crate::spatial::{SpatialAudioPlugin, SpatialEmitter, SpatialWorld};
@@ -39,13 +38,8 @@ pub struct AudioPlugin;
 
 impl Plugin for AudioPlugin {
     fn build(&self, app: &mut App) {
-        let audio_manager_settings = app
-            .world
-            .remove_non_send_resource::<AudioSettings>()
-            .unwrap_or_default();
-        app.insert_non_send_resource(
-            AudioManager::new(audio_manager_settings).expect("Cannot create audio engine"),
-        )
+        app
+            .init_resource::<AudioWorld>()
         .init_asset::<AudioFile>()
         .init_asset_loader::<AudioLoader>()
         .add_plugins((
@@ -64,21 +58,42 @@ impl Plugin for AudioPlugin {
     }
 }
 
-#[derive(Component)]
+#[derive(Resource)]
+pub(crate) struct AudioWorld {
+    pub(crate) audio_manager: AudioManager<AudioBackend>,
+    pub(crate) audio_handles: BTreeMap<Entity, RawAudioHandle>,
+    pub(crate) tracks: BTreeMap<Entity, TrackHandle>,
+}
+
+impl FromWorld for AudioWorld {
+    fn from_world(world: &mut World) -> Self {
+        let audio_manager_settings = 
+            world
+            .remove_non_send_resource::<AudioSettings>()
+            .unwrap_or_default();
+        let audio_manager = AudioManager::new(audio_manager_settings).expect("Cannot create audio backend");
+        Self {
+            audio_manager,
+            audio_handles: BTreeMap::new(),
+            tracks: BTreeMap::new(),
+        }
+    }
+}
+
+#[derive(Component, Clone)]
 pub struct Audio {
     file: Handle<AudioFile>,
-    handle: Option<HandleId>,
     start_paused: bool,
-    track_entity: Option<Entity>,
 }
+
+#[derive(Component, Copy, Clone)]
+pub struct AudioTrack(pub Entity);
 
 impl Audio {
     pub fn new(file: Handle<AudioFile>) -> Self {
         Self {
             file,
-            handle: None,
             start_paused: false,
-            track_entity: None,
         }
     }
 
@@ -86,50 +101,38 @@ impl Audio {
         self.start_paused = start_paused;
         self
     }
-
-    pub fn in_track(mut self, entity: Entity) -> Self {
-        self.track_entity.replace(entity);
-        self
-    }
-
-    pub fn is_ready(&self) -> bool {
-        self.handle.is_some()
-    }
 }
 
 fn has_audio_to_add(asset_server: Res<AssetServer>, q: Query<&Audio>) -> bool {
     q.into_iter()
-        .any(|q| q.handle.is_none() && asset_server.is_loaded_with_dependencies(q.file.id()))
+        .any(|q| asset_server.is_loaded_with_dependencies(q.file.id()))
 }
 
 fn add_audio(
-    mut audio_manager: NonSendMut<AudioManager>,
+    mut audio_world: ResMut<AudioWorld>,
     spatial_world: Res<SpatialWorld>,
     audio_files: Res<Assets<AudioFile>>,
     asset_server: Res<AssetServer>,
-    mut q: Query<(Entity, &mut Audio, Option<&SpatialEmitter>)>,
+    mut q: Query<(Entity, &mut Audio, Option<&SpatialEmitter>, Option<&AudioTrack>)>,
     q_tracks: Query<&Track>,
 ) {
-    for (entity, mut audio, spatial_emitter) in &mut q {
+    for (entity, mut audio, spatial_emitter, audio_track) in &mut q {
         let audio = audio.bypass_change_detection();
-        if audio.handle.is_some() {
-            continue;
-        }
-        if !asset_server.is_loaded_with_dependencies(audio.file.id()) {
+        if audio_world.audio_handles.contains_key(&entity) || !asset_server.is_loaded_with_dependencies(audio.file.id()) {
             continue;
         }
 
         debug!("Audio added to {entity:?}");
         let data = audio_files.get(audio.file.id()).unwrap();
         let result = match data {
-            AudioFile::Static(data, settings) => audio_manager
-                .kira_manager
+            AudioFile::Static(data, settings) => audio_world
+                .audio_manager
                 .play(
                     StaticSoundData::from_cursor(Cursor::new(data.clone()), {
                         if spatial_emitter.is_some() {
                             (*settings)
                                 .output_destination(&spatial_world.emitters[&entity])
-                        } else if let Some(track_entity) = audio.track_entity {
+                        } else if let Some(AudioTrack(track_entity)) = audio_track.copied() {
                             if let Some(handle) = q_tracks
                                 .get(track_entity)
                                 .ok()
@@ -148,9 +151,26 @@ fn add_audio(
                 .map(RawAudioHandle::Static)
                 .map_err(|err| err.to_string()),
             AudioFile::Streaming { path, settings } => {
-                match StreamingSoundData::from_file(path, *settings) {
-                    Ok(data) => audio_manager
-                        .kira_manager
+                match StreamingSoundData::from_file(path, {
+                    if spatial_emitter.is_some() {
+                        (*settings)
+                            .output_destination(&spatial_world.emitters[&entity])
+                    } else if let Some(AudioTrack(track_entity)) = audio_track.copied() {
+                        if let Some(handle) = q_tracks
+                            .get(track_entity)
+                            .ok()
+                            .and_then(|track| track.handle.as_ref())
+                        {
+                            (*settings).output_destination(handle)
+                        } else {
+                            *settings
+                        }
+                    } else {
+                        *settings
+                    }
+                }) {
+                    Ok(data) => audio_world
+                        .audio_manager
                         .play(data)
                         .map(RawAudioHandle::Streaming)
                         .map_err(|err| err.to_string()),
@@ -166,8 +186,7 @@ fn add_audio(
                 if audio.start_paused {
                     handle.pause(Tween::default()).unwrap();
                 }
-                let id = audio_manager.insert_handle(handle);
-                audio.handle.replace(id);
+                audio_world.audio_handles.insert(entity, handle);
             }
             Err(err) => {
                 error!("Cannot play sound: {err}");
@@ -176,11 +195,19 @@ fn add_audio(
     }
 }
 
-fn reset_handle_on_audiofile_changed(mut q: Query<(Entity, &mut Audio), Changed<Audio>>) {
-    for (entity, mut audio) in &mut q {
-        let audio = audio.bypass_change_detection();
+fn remove_audio(
+    mut audio_world: ResMut<AudioWorld>,
+    mut removed: RemovedComponents<Audio>,
+) {
+    for entity in removed.read() {
+        audio_world.audio_handles.remove(&entity);
+    }
+}
+
+fn reset_handle_on_audiofile_changed(mut audio_world: ResMut<AudioWorld>, mut q: Query<Entity, Changed<Audio>>) {
+    for entity in &mut q {
         debug!("AudioFile changed on entity {entity:?}, reset handle");
-        audio.handle.take();
+        audio_world.audio_handles.remove(&entity);
     }
 }
 
@@ -191,4 +218,25 @@ pub enum AudioFile {
         path: PathBuf,
         settings: StreamingSoundSettings,
     },
+}
+
+pub(crate) enum RawAudioHandle {
+    Static(StaticSoundHandle),
+    Streaming(StreamingSoundHandle<FromFileError>),
+}
+
+impl RawAudioHandle {
+    pub(crate) fn resume(&mut self, tween: Tween) -> Result<(), kira::CommandError> {
+        match self {
+            Self::Static(handle) => handle.resume(tween),
+            Self::Streaming(handle) => handle.resume(tween),
+        }
+    }
+
+    pub(crate) fn pause(&mut self, tween: Tween) -> Result<(), kira::CommandError> {
+        match self {
+            Self::Static(handle) => handle.pause(tween),
+            Self::Streaming(handle) => handle.pause(tween),
+        }
+    }
 }

@@ -1,5 +1,4 @@
-use crate::manager::AudioManager;
-use crate::Audio;
+use crate::{Audio, AudioWorld};
 
 use bevy::prelude::*;
 
@@ -14,21 +13,7 @@ pub struct SpatialAudioPlugin;
 
 impl Plugin for SpatialAudioPlugin {
     fn build(&self, app: &mut App) {
-        let settings = app
-            .world
-            .remove_non_send_resource::<SpatialSceneSettings>()
-            .unwrap_or_default();
-        let mut audio_manager = app.world.non_send_resource_mut::<AudioManager>();
-        let spatial_handle = audio_manager
-            .kira_manager
-            .add_spatial_scene(settings)
-            .expect("Cannot create audio spatial world");
-        app.world.insert_resource(SpatialWorld {
-            spatial_handle,
-            emitters: BTreeMap::new(),
-            listeners: BTreeMap::new(),
-        });
-        app.add_systems(PreUpdate, (add_listeners, add_emitters))
+        app.init_resource::<SpatialWorld>().add_systems(PreUpdate, (add_listeners, add_emitters))
             .add_systems(PostUpdate, (update_listeners, update_emitters));
     }
 }
@@ -44,6 +29,25 @@ pub struct SpatialWorld {
     pub(crate) spatial_handle: SpatialSceneHandle,
     pub(crate) emitters: BTreeMap<Entity, EmitterHandle>,
     pub(crate) listeners: BTreeMap<Entity, ListenerHandle>,
+}
+
+impl FromWorld for SpatialWorld {
+    fn from_world(world: &mut World) -> Self {
+        let settings = 
+            world
+            .remove_non_send_resource::<SpatialSceneSettings>()
+            .unwrap_or_default();
+        let mut audio_world = world.resource_mut::<AudioWorld>();
+        let spatial_handle = audio_world
+            .audio_manager
+            .add_spatial_scene(settings)
+            .expect("Cannot create audio spatial world");
+        Self {
+            spatial_handle,
+            emitters: BTreeMap::new(),
+            listeners: BTreeMap::new(),
+        }
+    }
 }
 
 fn add_listeners(

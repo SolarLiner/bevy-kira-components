@@ -1,6 +1,6 @@
-use crate::manager::AudioManager;
 use bevy::diagnostic::{Diagnostic, DiagnosticPath, Diagnostics, RegisterDiagnostic};
 use bevy::prelude::*;
+use crate::AudioWorld;
 
 pub struct KiraStatisticsDiagnosticPlugin;
 
@@ -19,13 +19,13 @@ const NUM_SOUNDS: DiagnosticPath = DiagnosticPath::const_new("kira::manager::num
 const NUM_CLOCKS: DiagnosticPath = DiagnosticPath::const_new("kira::manager::num_clocks");
 const NUM_MODULATORS: DiagnosticPath = DiagnosticPath::const_new("kira::manager::num_modulators");
 
-fn record_diagnostics(audio_manager: NonSend<AudioManager>, mut diagnostics: Diagnostics) {
+fn record_diagnostics(audio_world: Res<AudioWorld>, mut diagnostics: Diagnostics) {
     diagnostics.add_measurement(&NUM_COMMANDS, || {
-        audio_manager.kira_manager.num_modulators() as _
+        audio_world.audio_manager.num_modulators() as _
     });
-    diagnostics.add_measurement(&NUM_SOUNDS, || audio_manager.kira_manager.num_sounds() as _);
-    diagnostics.add_measurement(&NUM_CLOCKS, || audio_manager.kira_manager.num_clocks() as _);
+    diagnostics.add_measurement(&NUM_SOUNDS, || audio_world.audio_manager.num_sounds() as _);
+    diagnostics.add_measurement(&NUM_CLOCKS, || audio_world.audio_manager.num_clocks() as _);
     diagnostics.add_measurement(&NUM_MODULATORS, || {
-        audio_manager.kira_manager.num_modulators() as _
+        audio_world.audio_manager.num_modulators() as _
     });
 }
