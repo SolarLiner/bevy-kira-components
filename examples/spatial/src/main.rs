@@ -4,18 +4,22 @@ use bevy::prelude::*;
 use bevy_kira_components::kira::sound::Region;
 use bevy_kira_components::spatial::{AudioListener, SpatialEmitter};
 use bevy_kira_components::{Audio, AudioLoaderSettings, AudioPlugin};
+use diagnostics_ui::DiagnosticsUiPlugin;
 
 use crate::camera::{CameraPlugin, FpsCam};
+use crate::ui::UiPlugin;
 
 mod camera;
+mod ui;
 
 fn main() {
     App::new()
         .add_plugins((
             DefaultPlugins,
             AudioPlugin,
-            LogDiagnosticsPlugin::default(),
+            DiagnosticsUiPlugin,
             CameraPlugin,
+            UiPlugin,
         ))
         .add_systems(Startup, (init_camera, init_objects))
         .run();

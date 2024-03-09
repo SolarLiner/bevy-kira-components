@@ -1,8 +1,6 @@
 mod ui;
 
-use bevy::diagnostic::{
-    EntityCountDiagnosticsPlugin, FrameTimeDiagnosticsPlugin, LogDiagnosticsPlugin,
-};
+use bevy::diagnostic::LogDiagnosticsPlugin;
 use bevy::prelude::*;
 
 use crate::ui::UiPlugin;
@@ -14,7 +12,8 @@ use bevy_kira_components::kira::track::effect::panning_control::{
 use bevy_kira_components::kira::track::TrackBuilder;
 use bevy_kira_components::kira::tween::Tween;
 use bevy_kira_components::tracks::{EffectHandle, Track};
-use bevy_kira_components::{Audio, AudioLoaderSettings, AudioPlugin};
+use bevy_kira_components::{Audio, AudioLoaderSettings, AudioPlugin, AudioTrack};
+use diagnostics_ui::DiagnosticsUiPlugin;
 
 fn main() {
     App::new()
@@ -22,11 +21,10 @@ fn main() {
             DefaultPlugins,
             AudioPlugin,
             LogDiagnosticsPlugin::default(),
-            FrameTimeDiagnosticsPlugin,
-            EntityCountDiagnosticsPlugin,
+            DiagnosticsUiPlugin,
             UiPlugin,
         ))
-        .add_systems(Startup, (init, init_ui))
+        .add_systems(Startup, init)
         .add_systems(Update, (handle_interactive_sound, update_track_panning))
         .run();
 }
@@ -57,32 +55,10 @@ fn init(mut commands: Commands, asset_server: Res<AssetServer>) {
             },
             ..default()
         },
-        Audio::new(audio_file)
-            .start_paused(true)
-            .in_track(track_entity),
+        Audio::new(audio_file).start_paused(true),
+        AudioTrack(track_entity),
         InteractiveSound,
     ));
-}
-
-fn init_ui(mut commands: Commands) {
-    commands
-        .spawn(NodeBundle { ..default() })
-        .with_children(|children| {
-            children.spawn(TextBundle {
-                text: Text::from_section(
-                    "Hold Space to play sound",
-                    TextStyle {
-                        font_size: 16.0,
-                        ..default()
-                    },
-                ),
-                style: Style {
-                    margin: UiRect::all(Val::Px(8.0)),
-                    ..default()
-                },
-                ..default()
-            });
-        });
 }
 
 fn update_track_panning(
