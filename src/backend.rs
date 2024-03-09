@@ -45,7 +45,10 @@ impl Backend for AudioBackend {
     fn start(&mut self, renderer: Renderer) -> Result<(), Self::Error> {
         match self {
             Self::Physical(backend) => backend.start(renderer).map_err(Into::into),
-            Self::Mock(mock) => Ok(mock.start(renderer).unwrap()),
+            Self::Mock(mock) => {
+                mock.start(renderer).unwrap();
+                Ok(())
+            },
         }
     }
 }

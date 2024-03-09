@@ -6,19 +6,19 @@ mod manager;
 pub mod spatial;
 pub mod tracks;
 
-use bevy::ecs::system::{Command, EntityCommand};
+
 
 use std::io::Cursor;
-use std::sync::atomic::{AtomicU64, Ordering};
+
 
 use bevy::prelude::*;
-use kira::manager::backend::{Backend, DefaultBackend};
+
 use kira::manager::AudioManagerSettings;
-use kira::sound::static_sound::{StaticSoundData, StaticSoundHandle, StaticSoundSettings};
-use kira::sound::SoundData;
+use kira::sound::static_sound::{StaticSoundData, StaticSoundSettings};
+
 use kira::tween::Tween;
 
-use crate::backend::{AudioBackend, AudioBackendError, AudioBackendSelector};
+use crate::backend::{AudioBackend};
 use crate::loader::AudioLoader;
 use crate::manager::{AudioManager, RawAudioHandle};
 pub use kira;
@@ -127,23 +127,20 @@ fn add_audio(
                 .play(
                     StaticSoundData::from_cursor(Cursor::new(data.clone()), {
                         if spatial_emitter.is_some() {
-                            settings
-                                .clone()
+                            (*settings)
                                 .output_destination(&spatial_world.emitters[&entity])
-                        } else {
-                            if let Some(track_entity) = audio.track_entity {
-                                if let Some(handle) = q_tracks
-                                    .get(track_entity)
-                                    .ok()
-                                    .and_then(|track| track.handle.as_ref())
-                                {
-                                    settings.clone().output_destination(handle)
-                                } else {
-                                    settings.clone()
-                                }
+                        } else if let Some(track_entity) = audio.track_entity {
+                            if let Some(handle) = q_tracks
+                                .get(track_entity)
+                                .ok()
+                                .and_then(|track| track.handle.as_ref())
+                            {
+                                (*settings).output_destination(handle)
                             } else {
-                                settings.clone()
+                                *settings
                             }
+                        } else {
+                            *settings
                         }
                     })
                     .unwrap(),
@@ -151,7 +148,7 @@ fn add_audio(
                 .map(RawAudioHandle::Static)
                 .map_err(|err| err.to_string()),
             AudioFile::Streaming { path, settings } => {
-                match StreamingSoundData::from_file(path, settings.clone()) {
+                match StreamingSoundData::from_file(path, *settings) {
                     Ok(data) => audio_manager
                         .kira_manager
                         .play(data)

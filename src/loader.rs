@@ -2,12 +2,12 @@ use crate::AudioFile;
 use bevy::asset::io::Reader;
 use bevy::asset::{AssetLoader, AsyncReadExt, LoadContext};
 use bevy::utils::BoxedFuture;
-use kira::sound::static_sound::{StaticSoundData, StaticSoundSettings};
-use kira::sound::streaming::{StreamingSoundData, StreamingSoundSettings};
+use kira::sound::static_sound::{StaticSoundSettings};
+use kira::sound::streaming::{StreamingSoundSettings};
 use kira::sound::{FromFileError, Region};
 use serde::{Deserialize, Serialize};
-use std::io::Cursor;
-use std::ops::RangeFull;
+
+
 use thiserror::Error;
 
 #[derive(Default)]
@@ -26,19 +26,13 @@ pub enum AudioLoaderError {
 }
 
 #[derive(Debug, Copy, Clone, Serialize, Deserialize)]
+#[derive(Default)]
 pub struct AudioLoaderSettings {
     pub streaming: bool,
     pub looping: Option<Region>,
 }
 
-impl Default for AudioLoaderSettings {
-    fn default() -> Self {
-        Self {
-            streaming: false,
-            looping: None,
-        }
-    }
-}
+
 
 impl AssetLoader for AudioLoader {
     type Asset = AudioFile;

@@ -1,4 +1,4 @@
-use bevy::diagnostic::{DiagnosticPath, Diagnostics, DiagnosticsPlugin, DiagnosticsStore};
+use bevy::diagnostic::{DiagnosticPath, DiagnosticsStore};
 use bevy::prelude::*;
 
 pub struct UiPlugin;

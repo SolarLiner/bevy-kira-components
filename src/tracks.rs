@@ -1,7 +1,7 @@
 use crate::manager::AudioManager;
 use bevy::prelude::*;
-use kira::spatial::scene::SpatialSceneSettings;
-use kira::track::effect::EffectBuilder;
+
+
 use kira::track::{TrackBuilder, TrackHandle};
 
 pub struct AudioTracksPlugin;
