@@ -1547,6 +1547,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "diagnostics-ui"
+version = "0.1.0"
+dependencies = [
+ "bevy",
+]
+
+[[package]]
 name = "dispatch"
 version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2161,6 +2168,7 @@ version = "0.1.0"
 dependencies = [
  "bevy",
  "bevy-kira-components",
+ "diagnostics-ui",
 ]
 
 [[package]]
@@ -3253,6 +3261,7 @@ version = "0.1.0"
 dependencies = [
  "bevy",
  "bevy-kira-components",
+ "diagnostics-ui",
 ]
 
 [[package]]

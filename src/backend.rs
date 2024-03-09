@@ -48,7 +48,7 @@ impl Backend for AudioBackend {
             Self::Mock(mock) => {
                 mock.start(renderer).unwrap();
                 Ok(())
-            },
+            }
         }
     }
 }

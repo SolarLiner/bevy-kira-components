@@ -5,7 +5,6 @@ use bevy::prelude::{Entity, World};
 
 use kira::tween::Tween;
 
-
 pub struct PlayAudio(pub Tween);
 
 impl EntityCommand for PlayAudio {

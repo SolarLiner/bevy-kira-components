@@ -13,7 +13,8 @@ pub struct SpatialAudioPlugin;
 
 impl Plugin for SpatialAudioPlugin {
     fn build(&self, app: &mut App) {
-        app.init_resource::<SpatialWorld>().add_systems(PreUpdate, (add_listeners, add_emitters))
+        app.init_resource::<SpatialWorld>()
+            .add_systems(PreUpdate, (add_listeners, add_emitters))
             .add_systems(PostUpdate, (update_listeners, update_emitters));
     }
 }
@@ -33,8 +34,7 @@ pub struct SpatialWorld {
 
 impl FromWorld for SpatialWorld {
     fn from_world(world: &mut World) -> Self {
-        let settings = 
-            world
+        let settings = world
             .remove_non_send_resource::<SpatialSceneSettings>()
             .unwrap_or_default();
         let mut audio_world = world.resource_mut::<AudioWorld>();
