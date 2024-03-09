@@ -1,4 +1,4 @@
-workspace = { members = ["examples/interactive"] }
+workspace = { members = ["examples/interactive", "examples/spatial"] }
 [package]
 name = "bevy-kira-components"
 version = "0.1.0"
@@ -7,7 +7,7 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-kira = "0.8.7"
+kira = { version = "0.8.7", features = ["serde"] }
 thiserror = "1.0.57"
 serde = { version = "1.0.197", features = ["derive"] }
 

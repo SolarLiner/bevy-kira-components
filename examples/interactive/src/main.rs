@@ -7,6 +7,7 @@ use bevy::prelude::*;
 
 use crate::ui::UiPlugin;
 use bevy_kira_components::commands::{PauseAudio, PlayAudio};
+use bevy_kira_components::kira::sound::Region;
 use bevy_kira_components::kira::track::effect::panning_control::{
     PanningControlBuilder, PanningControlHandle,
 };
@@ -38,9 +39,9 @@ struct PanTrack;
 
 fn init(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands.spawn(Camera2dBundle { ..default() });
-    let audio_file = asset_server
-        .load_with_settings("loop.ogg", |settings: &mut AudioLoaderSettings| {
-            settings.looping = true
+    let audio_file =
+        asset_server.load_with_settings("drums.ogg", |settings: &mut AudioLoaderSettings| {
+            settings.looping = Some(Region::from(3.6..6.0));
         });
     let mut track = TrackBuilder::new();
     let panning = track.add_effect(PanningControlBuilder::default());
@@ -89,6 +90,7 @@ fn update_track_panning(
     mut q: Query<&mut EffectHandle<PanningControlHandle>, With<PanTrack>>,
 ) {
     let pan = time.elapsed_seconds_f64().sin();
+    let pan = 0.5 * pan + 0.5;
     for mut effect in &mut q {
         if let Err(err) = effect.set_panning(pan, Tween::default()) {
             error!("Cannot update track panning: {err}");

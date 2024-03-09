@@ -3,13 +3,12 @@ pub mod commands;
 mod diagnostics;
 mod loader;
 mod manager;
+pub mod spatial;
 pub mod tracks;
 
 use bevy::ecs::system::{Command, EntityCommand};
-use std::collections::BTreeMap;
-use std::fmt;
+
 use std::io::Cursor;
-use std::marker::PhantomData;
 use std::sync::atomic::{AtomicU64, Ordering};
 
 use bevy::prelude::*;
@@ -29,6 +28,7 @@ use std::path::PathBuf;
 use std::sync::Arc;
 
 use crate::diagnostics::KiraStatisticsDiagnosticPlugin;
+use crate::spatial::{SpatialAudioPlugin, SpatialEmitter, SpatialWorld};
 use crate::tracks::{AudioTracksPlugin, Track};
 pub use loader::AudioLoaderSettings;
 
@@ -48,7 +48,11 @@ impl Plugin for AudioPlugin {
         )
         .init_asset::<AudioFile>()
         .init_asset_loader::<AudioLoader>()
-        .add_plugins((AudioTracksPlugin, KiraStatisticsDiagnosticPlugin))
+        .add_plugins((
+            AudioTracksPlugin,
+            SpatialAudioPlugin,
+            KiraStatisticsDiagnosticPlugin,
+        ))
         .add_systems(
             PreUpdate,
             (
@@ -100,12 +104,13 @@ fn has_audio_to_add(asset_server: Res<AssetServer>, q: Query<&Audio>) -> bool {
 
 fn add_audio(
     mut audio_manager: NonSendMut<AudioManager>,
+    spatial_world: Res<SpatialWorld>,
     audio_files: Res<Assets<AudioFile>>,
     asset_server: Res<AssetServer>,
-    mut q: Query<(Entity, &mut Audio)>,
+    mut q: Query<(Entity, &mut Audio, Option<&SpatialEmitter>)>,
     q_tracks: Query<&Track>,
 ) {
-    for (entity, mut audio) in &mut q {
+    for (entity, mut audio, spatial_emitter) in &mut q {
         let audio = audio.bypass_change_detection();
         if audio.handle.is_some() {
             continue;
@@ -121,18 +126,24 @@ fn add_audio(
                 .kira_manager
                 .play(
                     StaticSoundData::from_cursor(Cursor::new(data.clone()), {
-                        if let Some(track_entity) = audio.track_entity {
-                            if let Some(handle) = q_tracks
-                                .get(track_entity)
-                                .ok()
-                                .and_then(|track| track.handle.as_ref())
-                            {
-                                settings.clone().output_destination(handle)
+                        if spatial_emitter.is_some() {
+                            settings
+                                .clone()
+                                .output_destination(&spatial_world.emitters[&entity])
+                        } else {
+                            if let Some(track_entity) = audio.track_entity {
+                                if let Some(handle) = q_tracks
+                                    .get(track_entity)
+                                    .ok()
+                                    .and_then(|track| track.handle.as_ref())
+                                {
+                                    settings.clone().output_destination(handle)
+                                } else {
+                                    settings.clone()
+                                }
                             } else {
                                 settings.clone()
                             }
-                        } else {
-                            settings.clone()
                         }
                     })
                     .unwrap(),

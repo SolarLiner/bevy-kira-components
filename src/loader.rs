@@ -27,15 +27,15 @@ pub enum AudioLoaderError {
 
 #[derive(Debug, Copy, Clone, Serialize, Deserialize)]
 pub struct AudioLoaderSettings {
-    pub looping: bool,
-    streaming: bool,
+    pub streaming: bool,
+    pub looping: Option<Region>,
 }
 
 impl Default for AudioLoaderSettings {
     fn default() -> Self {
         Self {
-            looping: false,
             streaming: false,
+            looping: None,
         }
     }
 }
@@ -55,16 +55,14 @@ impl AssetLoader for AudioLoader {
             if _settings.streaming {
                 Ok(AudioFile::Streaming {
                     path: _load_context.path().to_path_buf(),
-                    settings: StreamingSoundSettings::new()
-                        .loop_region(_settings.looping.then(|| RangeFull.into())),
+                    settings: StreamingSoundSettings::new().loop_region(_settings.looping),
                 })
             } else {
                 let mut sound_bytes = vec![];
                 reader.read_to_end(&mut sound_bytes).await?;
                 Ok(AudioFile::Static(
                     sound_bytes.into(),
-                    StaticSoundSettings::default()
-                        .loop_region(_settings.looping.then(|| RangeFull.into())),
+                    StaticSoundSettings::default().loop_region(_settings.looping),
                 ))
             }
         })
