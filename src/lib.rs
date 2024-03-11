@@ -1,3 +1,19 @@
+//! Add audio support to Bevy through the [`kira`] crate.
+//! 
+//! This crate aims at creating a replacement for `bevy_audio` by instead integrating Kira, a crate
+//! for audio playback aimed at games, and used in several other Rust projects.
+//! 
+//! This particular crate is an experiment in making a component-based ECS API, instead of a
+//! resource-based approach, currently taken by `bevy_kira_audio`.
+//! 
+//! To get started playing sounds, insert the [`Audio`] component on an entity. The entity will
+//! start playing right away unless [`Audio::start_paused`] is called.
+//! 
+//! The [`Audio`] component requires an [`AudioFile`], an [`Asset`](bevy::asset::Asset) which
+//! supports both loading in-memory and streaming the file (only for local assets).
+//! 
+//! Spatial audio is supported built-in with the [`SpatialEmitter`] component, which tells the plugin
+//! to add the entity as an emitter, provided it also has a [`GlobalTransform`] component attached.
 mod backend;
 pub mod commands;
 mod diagnostics;
@@ -31,6 +47,7 @@ pub use loader::AudioLoaderSettings;
 
 pub type AudioSettings = AudioManagerSettings<AudioBackend>;
 
+/// Adds audio to Bevy games via the [`kira`] crate.
 #[derive(Debug, Default)]
 pub struct AudioPlugin;
 
@@ -78,7 +95,7 @@ impl FromWorld for AudioWorld {
 
 #[derive(Component, Clone)]
 pub struct Audio {
-    file: Handle<AudioFile>,
+    pub file: Handle<AudioFile>,
     start_paused: bool,
 }
 
