@@ -7,7 +7,6 @@ use kira::spatial::listener::ListenerHandle;
 use kira::spatial::scene::{SpatialSceneHandle, SpatialSceneSettings};
 use kira::tween::Tween;
 
-use std::collections::BTreeMap;
 use bevy::ecs::entity::EntityHashMap;
 
 pub struct SpatialAudioPlugin;

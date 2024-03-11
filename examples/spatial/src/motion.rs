@@ -4,7 +4,8 @@ pub struct MotionPlugin;
 
 impl Plugin for MotionPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(PostUpdate, add_motion).add_systems(Last, update_motion);
+        app.add_systems(PostUpdate, add_motion)
+            .add_systems(Last, update_motion);
     }
 }
 
@@ -20,7 +21,10 @@ impl Motion {
     }
 }
 
-fn add_motion(mut commands: Commands, q: Query<(Entity, &GlobalTransform), Added<GlobalTransform>>) {
+fn add_motion(
+    mut commands: Commands,
+    q: Query<(Entity, &GlobalTransform), Added<GlobalTransform>>,
+) {
     for (entity, transform) in &q {
         commands.entity(entity).insert(Motion {
             motion: Vec3::ZERO,

@@ -1,11 +1,12 @@
-use bevy::prelude::*;
 use crate::{Doppler, DopplerUI};
+use bevy::prelude::*;
 
 pub struct UiPlugin;
 
 impl Plugin for UiPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Startup, ui_init).add_systems(Update, update_ui_doppler);
+        app.add_systems(Startup, ui_init)
+            .add_systems(Update, update_ui_doppler);
     }
 }
 
@@ -41,10 +42,10 @@ fn ui_init(mut commands: Commands) {
                 TextBundle {
                     text: Text::from_sections([
                         TextSection::new("Doppler factor ", style.clone()),
-                        TextSection::new("1.00x", style.clone())
+                        TextSection::new("1.00x", style.clone()),
                     ]),
                     ..default()
-                }
+                },
             ));
         });
 }

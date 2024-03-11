@@ -1,11 +1,11 @@
 use bevy::math::vec3;
 use bevy::prelude::*;
 
+use bevy_kira_components::commands::SetPlaybackSpeed;
 use bevy_kira_components::kira::sound::{PlaybackRate, Region};
+use bevy_kira_components::kira::tween::{Tween, Value};
 use bevy_kira_components::spatial::{AudioListener, SpatialEmitter};
 use bevy_kira_components::{Audio, AudioLoaderSettings, AudioPlugin};
-use bevy_kira_components::commands::SetPlaybackSpeed;
-use bevy_kira_components::kira::tween::{Tween, Value};
 use diagnostics_ui::DiagnosticsUiPlugin;
 
 use crate::camera::{CameraPlugin, FpsCam};
@@ -13,8 +13,8 @@ use crate::motion::{Motion, MotionPlugin};
 use crate::ui::UiPlugin;
 
 mod camera;
-mod ui;
 mod motion;
+mod ui;
 
 fn main() {
     App::new()
@@ -53,33 +53,37 @@ fn init_objects(
     asset_server: Res<AssetServer>,
 ) {
     // Audio emitter
-    commands.spawn((
-        Rotate(Quat::from_rotation_y(1.0)),
-        InheritedVisibility::VISIBLE,
-        TransformBundle {
-            local: Transform::from_xyz(0., 1., -6.0),
-            ..default()
-        })).with_children(|children| {
-        children.spawn((
-            SpatialEmitter,
-            Doppler(1.0),
-            Audio::new(
-                asset_server.load_with_settings("drums.ogg", |s: &mut AudioLoaderSettings| {
-                    s.looping = Some(Region::from(3.6..6.0));
-                }),
-            ),
-            PbrBundle {
-                mesh: meshes.add(Sphere::new(0.1).mesh()),
-                material: materials.add(StandardMaterial {
-                    base_color: Color::WHITE,
-                    emissive: Color::GREEN,
-                    ..default()
-                }),
-                transform: Transform::from_xyz(0., 0., 2.5),
+    commands
+        .spawn((
+            Rotate(Quat::from_rotation_y(1.0)),
+            InheritedVisibility::VISIBLE,
+            TransformBundle {
+                local: Transform::from_xyz(0., 1., -6.0),
                 ..default()
             },
-        ));
-    });
+        ))
+        .with_children(|children| {
+            children.spawn((
+                SpatialEmitter,
+                Doppler(1.0),
+                Audio::new(asset_server.load_with_settings(
+                    "drums.ogg",
+                    |s: &mut AudioLoaderSettings| {
+                        s.looping = Some(Region::from(3.6..6.0));
+                    },
+                )),
+                PbrBundle {
+                    mesh: meshes.add(Sphere::new(0.1).mesh()),
+                    material: materials.add(StandardMaterial {
+                        base_color: Color::WHITE,
+                        emissive: Color::GREEN,
+                        ..default()
+                    }),
+                    transform: Transform::from_xyz(0., 0., 2.5),
+                    ..default()
+                },
+            ));
+        });
 
     // Plane
     commands.spawn(PbrBundle {
@@ -137,7 +141,11 @@ fn fake_doppler_effect(
     let cam_transform = cam_transform.compute_transform();
     for (entity, mut doppler, transform, motion) in &mut q {
         let local_dir = Vec3::normalize(cam_transform.translation - transform.translation());
-        doppler.0 = (SPEED_OF_SOUND - cam_motion.motion().dot(local_dir)) / (SPEED_OF_SOUND - motion.motion().dot(local_dir));
-        commands.entity(entity).add(SetPlaybackSpeed(Value::Fixed(PlaybackRate::Factor(doppler.0 as _)), Tween::default()));
+        doppler.0 = (SPEED_OF_SOUND - cam_motion.motion().dot(local_dir))
+            / (SPEED_OF_SOUND - motion.motion().dot(local_dir));
+        commands.entity(entity).add(SetPlaybackSpeed(
+            Value::Fixed(PlaybackRate::Factor(doppler.0 as _)),
+            Tween::default(),
+        ));
     }
 }

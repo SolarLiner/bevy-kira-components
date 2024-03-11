@@ -20,9 +20,9 @@ pub use kira;
 use kira::sound::streaming::{StreamingSoundData, StreamingSoundHandle, StreamingSoundSettings};
 use kira::sound::{FromFileError, PlaybackRate};
 
+use bevy::ecs::entity::EntityHashMap;
 use std::path::PathBuf;
 use std::sync::Arc;
-use bevy::ecs::entity::EntityHashMap;
 
 use crate::diagnostics::KiraStatisticsDiagnosticPlugin;
 use crate::spatial::{SpatialAudioPlugin, SpatialEmitter, SpatialWorld};
@@ -51,7 +51,8 @@ impl Plugin for AudioPlugin {
                     add_audio.run_if(has_audio_to_add),
                 )
                     .chain(),
-            ).add_systems(Last, remove_audio);
+            )
+            .add_systems(Last, remove_audio);
     }
 }
 
@@ -131,7 +132,8 @@ fn add_audio(
                 .audio_manager
                 .play(
                     StaticSoundData::from_cursor(Cursor::new(data.clone()), {
-                        if spatial_emitter.is_some() && spatial_world.emitters.contains_key(&entity) {
+                        if spatial_emitter.is_some() && spatial_world.emitters.contains_key(&entity)
+                        {
                             (*settings).output_destination(&spatial_world.emitters[&entity])
                         } else if let Some(AudioTrack(track_entity)) = audio_track.copied() {
                             if let Some(handle) = q_tracks
@@ -147,7 +149,7 @@ fn add_audio(
                             *settings
                         }
                     })
-                        .unwrap(),
+                    .unwrap(),
                 )
                 .map(RawAudioHandle::Static)
                 .map_err(|err| err.to_string()),
@@ -241,7 +243,11 @@ impl RawAudioHandle {
         }
     }
 
-    pub(crate) fn set_playback_rate(&mut self, value: Value<PlaybackRate>, tween: Tween) -> Result<(), kira::CommandError> {
+    pub(crate) fn set_playback_rate(
+        &mut self,
+        value: Value<PlaybackRate>,
+        tween: Tween,
+    ) -> Result<(), kira::CommandError> {
         match self {
             Self::Static(handle) => handle.set_playback_rate(value, tween),
             Self::Streaming(handle) => handle.set_playback_rate(value, tween),
