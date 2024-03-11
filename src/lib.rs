@@ -5,7 +5,6 @@ mod loader;
 pub mod spatial;
 pub mod tracks;
 
-use std::collections::BTreeMap;
 use std::io::Cursor;
 
 use bevy::prelude::*;
@@ -20,9 +19,10 @@ use crate::loader::AudioLoader;
 pub use kira;
 use kira::sound::streaming::{StreamingSoundData, StreamingSoundHandle, StreamingSoundSettings};
 use kira::sound::{FromFileError, PlaybackRate};
-use kira::track::TrackHandle;
+
 use std::path::PathBuf;
 use std::sync::Arc;
+use bevy::ecs::entity::EntityHashMap;
 
 use crate::diagnostics::KiraStatisticsDiagnosticPlugin;
 use crate::spatial::{SpatialAudioPlugin, SpatialEmitter, SpatialWorld};
@@ -58,7 +58,7 @@ impl Plugin for AudioPlugin {
 #[derive(Resource)]
 pub(crate) struct AudioWorld {
     pub(crate) audio_manager: AudioManager<AudioBackend>,
-    pub(crate) audio_handles: BTreeMap<Entity, RawAudioHandle>,
+    pub(crate) audio_handles: EntityHashMap<RawAudioHandle>,
 }
 
 impl FromWorld for AudioWorld {
@@ -70,7 +70,7 @@ impl FromWorld for AudioWorld {
             AudioManager::new(audio_manager_settings).expect("Cannot create audio backend");
         Self {
             audio_manager,
-            audio_handles: BTreeMap::new(),
+            audio_handles: EntityHashMap::default(),
         }
     }
 }

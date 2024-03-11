@@ -8,6 +8,7 @@ use kira::spatial::scene::{SpatialSceneHandle, SpatialSceneSettings};
 use kira::tween::Tween;
 
 use std::collections::BTreeMap;
+use bevy::ecs::entity::EntityHashMap;
 
 pub struct SpatialAudioPlugin;
 
@@ -28,8 +29,8 @@ pub struct SpatialEmitter;
 #[derive(Resource)]
 pub struct SpatialWorld {
     pub(crate) spatial_handle: SpatialSceneHandle,
-    pub(crate) emitters: BTreeMap<Entity, EmitterHandle>,
-    pub(crate) listeners: BTreeMap<Entity, ListenerHandle>,
+    pub(crate) emitters: EntityHashMap<EmitterHandle>,
+    pub(crate) listeners: EntityHashMap<ListenerHandle>,
 }
 
 impl FromWorld for SpatialWorld {
@@ -44,8 +45,8 @@ impl FromWorld for SpatialWorld {
             .expect("Cannot create audio spatial world");
         Self {
             spatial_handle,
-            emitters: BTreeMap::new(),
-            listeners: BTreeMap::new(),
+            emitters: EntityHashMap::default(),
+            listeners: EntityHashMap::default(),
         }
     }
 }
