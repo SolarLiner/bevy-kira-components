@@ -1,10 +1,11 @@
 use bevy::prelude::*;
+use crate::{Doppler, DopplerUI};
 
 pub struct UiPlugin;
 
 impl Plugin for UiPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Startup, ui_init);
+        app.add_systems(Startup, ui_init).add_systems(Update, update_ui_doppler);
     }
 }
 
@@ -35,5 +36,21 @@ fn ui_init(mut commands: Commands) {
             child("Use WASD or arrows to move");
             child("Use mouse to look");
             child("Press Escape to release mouse");
+            children.spawn((
+                DopplerUI,
+                TextBundle {
+                    text: Text::from_sections([
+                        TextSection::new("Doppler factor ", style.clone()),
+                        TextSection::new("1.00x", style.clone())
+                    ]),
+                    ..default()
+                }
+            ));
         });
+}
+
+fn update_ui_doppler(mut q_text: Query<&mut Text, With<DopplerUI>>, q_doppler: Query<&Doppler>) {
+    let mut text = q_text.single_mut();
+    let doppler = q_doppler.single().0;
+    text.sections[1].value = format!("{doppler:1.2}x");
 }

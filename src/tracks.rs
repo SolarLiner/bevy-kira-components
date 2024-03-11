@@ -1,6 +1,6 @@
 use bevy::prelude::*;
 
-use crate::AudioWorld;
+use crate::{add_audio, AudioWorld};
 use kira::track::{TrackBuilder, TrackHandle};
 
 pub struct AudioTracksPlugin;
@@ -8,7 +8,7 @@ pub struct AudioTracksPlugin;
 impl Plugin for AudioTracksPlugin {
     fn build(&self, app: &mut App) {
         app.init_resource::<MainTrack>()
-            .add_systems(PostUpdate, handle_added_tracks);
+            .add_systems(PostUpdate, handle_added_tracks.before(add_audio));
     }
 }
 
@@ -52,15 +52,6 @@ fn handle_added_tracks(
                 Err(error) => error!("Cannot create track: {error}"),
             }
         }
-    }
-}
-
-fn handle_removed_tracks(
-    mut audio_world: ResMut<AudioWorld>,
-    mut removed: RemovedComponents<Track>,
-) {
-    for entity in removed.read() {
-        audio_world.tracks.remove(&entity);
     }
 }
 

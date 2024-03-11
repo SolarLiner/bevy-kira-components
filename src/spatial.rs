@@ -1,4 +1,4 @@
-use crate::{Audio, AudioWorld};
+use crate::{add_audio, Audio, AudioWorld};
 
 use bevy::prelude::*;
 
@@ -14,7 +14,7 @@ pub struct SpatialAudioPlugin;
 impl Plugin for SpatialAudioPlugin {
     fn build(&self, app: &mut App) {
         app.init_resource::<SpatialWorld>()
-            .add_systems(PreUpdate, (add_listeners, add_emitters))
+            .add_systems(PreUpdate, (add_listeners, add_emitters.before(add_audio)))
             .add_systems(PostUpdate, (update_listeners, update_emitters));
     }
 }
@@ -52,7 +52,7 @@ impl FromWorld for SpatialWorld {
 
 fn add_listeners(
     mut spatial_world: ResMut<SpatialWorld>,
-    q: Query<(Entity, &GlobalTransform), (Added<Camera>, With<AudioListener>)>,
+    q: Query<(Entity, &GlobalTransform), Added<AudioListener>>,
 ) {
     for (entity, global_transform) in &q {
         let (_, quat, position) = global_transform.to_scale_rotation_translation();
@@ -60,6 +60,7 @@ fn add_listeners(
             .spatial_handle
             .add_listener(position, quat, default())
             .unwrap();
+        debug!("Add listener to {entity:?}");
         spatial_world.listeners.insert(entity, listener);
     }
 }
@@ -75,6 +76,7 @@ fn add_emitters(
         let result = spatial_world
             .spatial_handle
             .add_emitter(global_transform.translation(), default());
+        debug!("Add emitter to {entity:?}");
         match result {
             Ok(emitter) => {
                 spatial_world.emitters.insert(entity, emitter);
@@ -88,7 +90,7 @@ fn add_emitters(
 
 fn update_listeners(
     mut spatial_world: ResMut<SpatialWorld>,
-    q: Query<(Entity, &GlobalTransform), (With<Camera>, With<AudioListener>)>,
+    q: Query<(Entity, &GlobalTransform), With<AudioListener>>,
 ) {
     for (entity, global_transform) in &q {
         let (_, quat, position) = global_transform.to_scale_rotation_translation();
