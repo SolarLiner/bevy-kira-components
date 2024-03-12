@@ -9,7 +9,7 @@
 //! To get started playing sounds, insert the [`Audio`] component on an entity. The entity will
 //! start playing right away unless [`Audio::start_paused`] is called.
 //! 
-//! The [`Audio`] component requires an [`AudioFile`], an [`Asset`](bevy::asset::Asset) which
+//! The [`Audio`] component requires an [`AudioFile`], an [`Asset`] which
 //! supports both loading in-memory and streaming the file (only for local assets).
 //! 
 //! Spatial audio is supported built-in with the [`SpatialEmitter`] component, which tells the plugin
@@ -46,6 +46,8 @@ use crate::spatial::{SpatialAudioPlugin, SpatialEmitter, SpatialWorld};
 use crate::tracks::{AudioTracksPlugin, Track};
 pub use loader::AudioLoaderSettings;
 
+/// Type of settings for the audio engine. Insert it as a resource before adding the plugin to
+/// change the default settings.
 pub type AudioSettings = AudioManagerSettings<AudioBackend>;
 
 /// Adds audio to Bevy games via the [`kira`] crate.
@@ -74,6 +76,9 @@ impl Plugin for AudioPlugin {
     }
 }
 
+/// Main resource holding all the bookkeeping necessary to link the ECS data to the audio engine.
+/// As a user, you'll want to use this to query information on the current audio engine settings, as
+/// well as properties on audio entities.
 #[derive(Resource)]
 pub struct AudioWorld {
     pub(crate) audio_manager: AudioManager<AudioBackend>,
@@ -115,16 +120,19 @@ impl AudioWorld {
     defer_handle_call!(fn position(&self) -> f64);
 }
 
+/// Tag the entity as being an audio source. Use [`Audio::new`] to create the component with a 
+/// [`Handle`] to an [`AudioFile`].
 #[derive(Component, Clone)]
 pub struct Audio {
+    /// Audio file this component is playing. You can change the handle to trigger a restart with
+    /// a new audio file.
     pub file: Handle<AudioFile>,
     start_paused: bool,
 }
 
-#[derive(Component, Copy, Clone)]
-pub struct AudioTrack(pub Entity);
-
 impl Audio {
+    /// Create a new audio source component, playing this [`AudioFile`]. The ECS system will 
+    /// automatically add it to the audio engine and start playing it.
     pub fn new(file: Handle<AudioFile>) -> Self {
         Self {
             file,
@@ -132,11 +140,21 @@ impl Audio {
         }
     }
 
+    /// Set whether the audio source starts paused, or if it starts playing right away (the 
+    /// default).
     pub fn start_paused(mut self, start_paused: bool) -> Self {
         self.start_paused = start_paused;
         self
     }
 }
+
+/// Mark this entity as playing through the specified track.
+/// 
+/// This only affects the spawning of the audio source entity, as [`kira`] does not allow 
+/// re-routing of audio signals after creation. If you do wish to do so, you'll need to despawn 
+/// the entity and create a new one with this component attached directly.
+#[derive(Component, Copy, Clone)]
+pub struct AudioTrack(pub Entity);
 
 fn has_audio_to_add(asset_server: Res<AssetServer>, q: Query<&Audio>) -> bool {
     q.into_iter()
@@ -253,6 +271,10 @@ fn reset_handle_on_audiofile_changed(
     }
 }
 
+/// Bevy [`Asset`] implementation that wraps audio data for [`kira`].
+/// 
+/// Streaming audio data is currently not possible over the internet, so when targeting the web, 
+/// all audio sources need to be [`Static`](Self::Static).
 #[derive(Asset, TypePath)]
 pub enum AudioFile {
     Static(Arc<[u8]>, StaticSoundSettings),

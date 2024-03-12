@@ -12,6 +12,7 @@ impl Plugin for AudioTracksPlugin {
     }
 }
 
+/// Resource holding the [`TrackHandle`] to the main track.
 #[derive(Resource)]
 pub struct MainTrack(pub TrackHandle);
 
@@ -23,6 +24,8 @@ impl FromWorld for MainTrack {
     }
 }
 
+/// Component marking this entity as being a track. Use [`Track::new`] to create a component with
+/// a [`TrackBuilder`].
 #[derive(Component)]
 pub struct Track {
     kira_track: Option<TrackBuilder>,
@@ -30,6 +33,7 @@ pub struct Track {
 }
 
 impl Track {
+    /// Create a new [`Track`] component with the given [`TrackBuilder`] settings.
     pub fn new(track: TrackBuilder) -> Self {
         Self {
             kira_track: Some(track),
@@ -55,5 +59,6 @@ fn handle_added_tracks(
     }
 }
 
+/// Effect handle component
 #[derive(Deref, DerefMut, Component)]
 pub struct EffectHandle<E>(pub E);
