@@ -1,11 +1,11 @@
 use bevy::math::vec3;
 use bevy::prelude::*;
 
-use bevy_kira_components::{Audio, AudioLoaderSettings, AudioPlugin};
 use bevy_kira_components::commands::SetPlaybackRate;
 use bevy_kira_components::kira::sound::{PlaybackRate, Region};
 use bevy_kira_components::kira::tween::Value;
 use bevy_kira_components::spatial::{AudioListener, SpatialEmitter};
+use bevy_kira_components::{Audio, AudioLoaderSettings, AudioPlugin};
 use diagnostics_ui::DiagnosticsUiPlugin;
 
 use crate::camera::{CameraPlugin, FpsCam};

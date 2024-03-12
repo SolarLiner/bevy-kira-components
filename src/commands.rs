@@ -10,7 +10,7 @@ macro_rules! impl_command {
     ($name:ident => fn $fnname:ident($($argname:ident: $argtype:ty),*) $(; derive($($derive:ty),*))?) => {
         $(#[derive($($derive),*)])?
         pub struct $name { $(pub $argname: $argtype),* }
-        
+
         impl EntityCommand for $name {
             fn apply(self, id: Entity, world: &mut World) {
                 let Self { $($argname),* } = self;
@@ -49,7 +49,7 @@ impl Default for SetPanning {
     fn default() -> Self {
         Self {
             panning: Value::Fixed(0.5),
-            tween: Tween::default()
+            tween: Tween::default(),
         }
     }
 }

@@ -1,13 +1,14 @@
+use crate::InteractiveSound;
 use bevy::app::{App, Plugin};
 use bevy::prelude::*;
 use bevy_kira_components::AudioWorld;
-use crate::InteractiveSound;
 
 pub struct UiPlugin;
 
 impl Plugin for UiPlugin {
     fn build(&self, app: &mut App) {
-        app.add_systems(Startup, ui_init).add_systems(Update, ui_update);
+        app.add_systems(Startup, ui_init)
+            .add_systems(Update, ui_update);
     }
 }
 
@@ -28,10 +29,7 @@ fn ui_init(mut commands: Commands) {
                 ..default()
             };
             children.spawn(TextBundle {
-                text: Text::from_section(
-                    "Hold Space to play sound",
-                    style.clone(),
-                ),
+                text: Text::from_section("Hold Space to play sound", style.clone()),
                 ..default()
             });
             children.spawn((
@@ -42,7 +40,7 @@ fn ui_init(mut commands: Commands) {
                         TextSection::new("0.0 s", style),
                     ]),
                     ..default()
-                }
+                },
             ));
         });
 }
@@ -50,7 +48,11 @@ fn ui_init(mut commands: Commands) {
 #[derive(Component)]
 struct PlaybackPos;
 
-fn ui_update(audio_world: Res<AudioWorld>, mut q_ui: Query<&mut Text, With<PlaybackPos>>, q_audio: Query<Entity, With<InteractiveSound>>) {
+fn ui_update(
+    audio_world: Res<AudioWorld>,
+    mut q_ui: Query<&mut Text, With<PlaybackPos>>,
+    q_audio: Query<Entity, With<InteractiveSound>>,
+) {
     let mut text = q_ui.single_mut();
     let entity = q_audio.single();
     let pos = audio_world.position(entity).unwrap();
