@@ -84,6 +84,12 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     needs: ["clippy"]
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}/valib
+    permissions:
+      id-token: write
+      pages: write
     steps:
       - name: Checkout sources
         uses: actions/checkout@v4
