@@ -34,11 +34,12 @@ use crate::backend::AudioBackend;
 use crate::loader::AudioLoader;
 pub use kira;
 use kira::sound::streaming::{StreamingSoundData, StreamingSoundHandle, StreamingSoundSettings};
-use kira::sound::{FromFileError, PlaybackRate};
+use kira::sound::{FromFileError, PlaybackRate, PlaybackState, Region};
 
 use bevy::ecs::entity::EntityHashMap;
 use std::path::PathBuf;
 use std::sync::Arc;
+use kira::CommandError;
 
 use crate::diagnostics::KiraStatisticsDiagnosticPlugin;
 use crate::spatial::{SpatialAudioPlugin, SpatialEmitter, SpatialWorld};
@@ -74,7 +75,7 @@ impl Plugin for AudioPlugin {
 }
 
 #[derive(Resource)]
-pub(crate) struct AudioWorld {
+pub struct AudioWorld {
     pub(crate) audio_manager: AudioManager<AudioBackend>,
     pub(crate) audio_handles: EntityHashMap<RawAudioHandle>,
 }
@@ -91,6 +92,27 @@ impl FromWorld for AudioWorld {
             audio_handles: EntityHashMap::default(),
         }
     }
+}
+
+macro_rules! defer_handle_call {
+    // Don't know how to parametrize the `mut` and be able to factor these two into one variant
+    (fn $name:ident(&self $(, $argname:ident: $argtype:ty)*) -> $ret:ty) => {
+        pub fn $name(&self, entity: Entity, $($argname: $argtype),*) -> Option<$ret> {
+            let handle = self.audio_handles.get(&entity)?;
+            Some(handle.$name($($argname),*))
+        }
+    };
+    (fn $name:ident(&mut self $(, $argname:ident: $argtype:ty)*) -> $ret:ty) => {
+        pub fn $name(&mut self, entity: Entity, $($argname: $argtype),*) -> Option<$ret> {
+            let handle = self.audio_handles.get_mut(&entity)?;
+            Some(handle.$name($($argname),*))
+        }
+    };
+}
+
+impl AudioWorld {
+    defer_handle_call!(fn state(&self) -> PlaybackState);
+    defer_handle_call!(fn position(&self) -> f64);
 }
 
 #[derive(Component, Clone)]
@@ -245,29 +267,36 @@ pub(crate) enum RawAudioHandle {
     Streaming(StreamingSoundHandle<FromFileError>),
 }
 
+macro_rules! defer_call {
+    // Don't know how to parametrize the `mut` and be able to factor these two into one variant
+    (fn $name:ident(&self $(, $argname:ident: $argtype:ty)*) -> $ret:ty) => {
+        pub(crate) fn $name(&self, $($argname: $argtype),*) -> $ret {
+            match self {
+                Self::Static(handle) => handle.$name($($argname),*),
+                Self::Streaming(handle) => handle.$name($($argname),*),
+            }
+        }
+    };
+    (fn $name:ident(&mut self $(, $argname:ident: $argtype:ty)*) -> $ret:ty) => {
+        pub(crate) fn $name(&mut self, $($argname: $argtype),*) -> $ret {
+            match self {
+                Self::Static(handle) => handle.$name($($argname),*),
+                Self::Streaming(handle) => handle.$name($($argname),*),
+            }
+        }
+    };
+}
+
 impl RawAudioHandle {
-    pub(crate) fn resume(&mut self, tween: Tween) -> Result<(), kira::CommandError> {
-        match self {
-            Self::Static(handle) => handle.resume(tween),
-            Self::Streaming(handle) => handle.resume(tween),
-        }
-    }
-
-    pub(crate) fn pause(&mut self, tween: Tween) -> Result<(), kira::CommandError> {
-        match self {
-            Self::Static(handle) => handle.pause(tween),
-            Self::Streaming(handle) => handle.pause(tween),
-        }
-    }
-
-    pub(crate) fn set_playback_rate(
-        &mut self,
-        value: Value<PlaybackRate>,
-        tween: Tween,
-    ) -> Result<(), kira::CommandError> {
-        match self {
-            Self::Static(handle) => handle.set_playback_rate(value, tween),
-            Self::Streaming(handle) => handle.set_playback_rate(value, tween),
-        }
-    }
+    defer_call!(fn state(&self) -> PlaybackState);
+    defer_call!(fn position(&self) -> f64);
+    defer_call!(fn set_playback_rate(&mut self, rate: impl Into<Value<PlaybackRate>>, tween: Tween) -> Result<(), CommandError>);
+    defer_call!(fn set_panning(&mut self, panning: impl Into<Value<f64>>, tween: Tween) ->Result<(), CommandError>);
+    defer_call!(fn set_playback_region(&mut self, region: impl Into<Region>) -> Result<(), CommandError>);
+    defer_call!(fn set_loop_region(&mut self, region: impl Into<Region>) -> Result<(), CommandError>);
+    defer_call!(fn pause(&mut self, tween: Tween) -> Result<(), CommandError>);
+    defer_call!(fn resume(&mut self, tween: Tween) -> Result<(), CommandError>);
+    defer_call!(fn stop(&mut self, tween: Tween) -> Result<(), CommandError>);
+    defer_call!(fn seek_to(&mut self, position: f64) -> Result<(), CommandError>);
+    defer_call!(fn seek_by(&mut self, amount: f64) -> Result<(), CommandError>);
 }

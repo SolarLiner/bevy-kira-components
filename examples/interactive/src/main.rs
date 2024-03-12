@@ -81,12 +81,12 @@ fn handle_interactive_sound(
 ) {
     if keyboard.just_pressed(KeyCode::Space) {
         for (entity, mut sprite) in &mut q {
-            commands.entity(entity).add(PlayAudio(Tween::default()));
+            commands.entity(entity).add(PlayAudio::default());
             sprite.color = Color::GREEN;
         }
     } else if keyboard.just_released(KeyCode::Space) {
         for (entity, mut sprite) in &mut q {
-            commands.entity(entity).add(PauseAudio(Tween::default()));
+            commands.entity(entity).add(PauseAudio::default());
             sprite.color = Color::GRAY;
         }
     }

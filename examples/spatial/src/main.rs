@@ -1,11 +1,11 @@
 use bevy::math::vec3;
 use bevy::prelude::*;
 
-use bevy_kira_components::commands::SetPlaybackSpeed;
-use bevy_kira_components::kira::sound::{PlaybackRate, Region};
-use bevy_kira_components::kira::tween::{Tween, Value};
-use bevy_kira_components::spatial::{AudioListener, SpatialEmitter};
 use bevy_kira_components::{Audio, AudioLoaderSettings, AudioPlugin};
+use bevy_kira_components::commands::SetPlaybackRate;
+use bevy_kira_components::kira::sound::{PlaybackRate, Region};
+use bevy_kira_components::kira::tween::Value;
+use bevy_kira_components::spatial::{AudioListener, SpatialEmitter};
 use diagnostics_ui::DiagnosticsUiPlugin;
 
 use crate::camera::{CameraPlugin, FpsCam};
@@ -143,9 +143,9 @@ fn fake_doppler_effect(
         let local_dir = Vec3::normalize(cam_transform.translation - transform.translation());
         doppler.0 = (SPEED_OF_SOUND - cam_motion.motion().dot(local_dir))
             / (SPEED_OF_SOUND - motion.motion().dot(local_dir));
-        commands.entity(entity).add(SetPlaybackSpeed(
-            Value::Fixed(PlaybackRate::Factor(doppler.0 as _)),
-            Tween::default(),
-        ));
+        commands.entity(entity).add(SetPlaybackRate {
+            rate: Value::Fixed(PlaybackRate::Factor(doppler.0 as _)),
+            ..default()
+        });
     }
 }

@@ -42,7 +42,7 @@ features = [
 opt-level = 3
 
 [features]
-default = ["dev"]
+default = []
 dev = [
     "bevy/dynamic_linking",
     "bevy/file_watcher",
