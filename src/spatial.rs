@@ -6,7 +6,6 @@ use kira::spatial::listener::ListenerHandle;
 use kira::spatial::scene::{SpatialSceneHandle, SpatialSceneSettings};
 use kira::tween::{Easing, Tween};
 
-
 use crate::{AudioPlaybackSet, AudioSourceSetup, AudioWorld, InternalAudioMarker};
 
 #[doc(hidden)]
@@ -14,7 +13,10 @@ pub mod prelude {
     pub use super::{AudioListener, SpatialEmitter, SpatialWorld};
 }
 
-pub struct SpatialAudioPlugin;
+/// Spatial audio plugin. This is an internal plugin, useful for some separation of concerns.
+///
+/// It is automatically added by the main [`AudioPlugin`].
+pub(crate) struct SpatialAudioPlugin;
 
 impl Plugin for SpatialAudioPlugin {
     fn build(&self, app: &mut App) {
@@ -33,16 +35,29 @@ impl Plugin for SpatialAudioPlugin {
     }
 }
 
+/// Marker component setting this entity as an audio listener. It must have a [`GlobalTransform`]
+/// attached for the spatial systems to pick it up.
 #[derive(Component)]
 pub struct AudioListener;
 
+/// Internal handle to a Kira listener. Used to update the audio listener position.
 #[derive(Component)]
 pub(crate) struct SpatialListenerHandle(ListenerHandle);
 
+/// Marker component setting this entity as a spatial emitter. It must have a [`GlobalTransform`]
+/// attached for the spatial systems to pick it up.
+///
+/// Note that these settings are only used in the setup of the spatial emitter, and not kept in
+/// sync afterwards.
 #[derive(Component)]
 pub struct SpatialEmitter {
-    attenuation: Option<Easing>,
-    enable_spatialization: bool,
+    /// Function describing the attenuation in volume depending on the distance of this emitter
+    /// to the listener.
+    pub attenuation: Option<Easing>,
+    /// Enables the panning effect that depends on the orientation of the listener.
+    pub enable_spatialization: bool,
+    /// Range of distances describing the distance at which the sound will be playing at full
+    /// volume, and the maximum distance at which the sound will be able to be heard.
     pub distances: EmitterDistances,
 }
 
@@ -56,9 +71,11 @@ impl Default for SpatialEmitter {
     }
 }
 
+/// Internal Kira handle emitter. Used to update the spatial emitter position.
 #[derive(Component)]
 pub(crate) struct SpatialEmitterHandle(pub(crate) EmitterHandle);
 
+/// Global data related to spatial handling in the audio engine.
 #[derive(Resource)]
 pub struct SpatialWorld {
     pub(crate) spatial_handle: SpatialSceneHandle,
@@ -99,10 +116,7 @@ fn add_listeners(
 fn add_emitters(
     mut commands: Commands,
     mut spatial_world: ResMut<SpatialWorld>,
-    q: Query<
-        (Entity, &GlobalTransform, &SpatialEmitter),
-        Added<InternalAudioMarker>,
-    >,
+    q: Query<(Entity, &GlobalTransform, &SpatialEmitter), Added<InternalAudioMarker>>,
 ) {
     for (entity, global_transform, spatial_emitter) in &q {
         let result = spatial_world.spatial_handle.add_emitter(

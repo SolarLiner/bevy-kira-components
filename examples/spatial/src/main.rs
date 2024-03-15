@@ -2,10 +2,10 @@ use bevy::math::vec3;
 use bevy::prelude::*;
 use bevy::utils::error;
 
-use bevy_kira_components::AudioPlugin;
 use bevy_kira_components::kira::sound::{PlaybackRate, Region};
 use bevy_kira_components::kira::tween::Tween;
 use bevy_kira_components::prelude::*;
+use bevy_kira_components::AudioPlugin;
 use diagnostics_ui::DiagnosticsUiPlugin;
 
 use crate::camera::{CameraPlugin, FpsCam};

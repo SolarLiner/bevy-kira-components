@@ -31,13 +31,15 @@ impl FromWorld for MainTrack {
     }
 }
 
-/// Component marking this entity as being a track. Use [`Track::new`] to create a component with
-/// a [`TrackBuilder`].
+/// Component marking this entity as being a track. Provide a [`TrackBuilder`], which are the
+/// settings applied to this new track.
 #[derive(Default, Component)]
 pub struct Track(pub TrackBuilder);
 
-#[derive(Component)]
-pub(crate) struct TrackHandle(pub(crate) kira::track::TrackHandle);
+/// Handle to the track in the audio engine. Access this component to make changes to the track
+/// in your systems.
+#[derive(Component, Deref, DerefMut)]
+pub struct TrackHandle(pub(crate) kira::track::TrackHandle);
 
 fn handle_added_tracks(
     mut commands: Commands,
@@ -56,7 +58,8 @@ fn handle_added_tracks(
     }
 }
 
-/// Effect handle component
+/// Effect handle component. Add the handle to an effect you've added to a track to be able to
+/// control it from here.
 #[derive(Deref, DerefMut, Component)]
 pub struct EffectHandle<E>(pub E);
 

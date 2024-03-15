@@ -33,6 +33,7 @@ pub mod prelude {
 
 pub type AudioFileBundle = AudioBundle<AudioFile>;
 
+/// Implementation of an audio source using the Static and Streaming file data from [`kira`].
 pub struct AudioFilePlugin;
 
 impl Plugin for AudioFilePlugin {
@@ -69,19 +70,28 @@ pub enum AudioFile {
     },
 }
 
+/// Enumeration of possible errors when loading an audio file.
 #[derive(Debug, Error)]
 pub enum AudioFileError {
     #[error(transparent)]
     FromFileError(#[from] FromFileError),
 }
 
+/// Settings available to the user when instantiating an audio file.
 #[derive(Debug, Component, Deserialize, Serialize)]
 pub struct AudioFileSettings {
+    /// By default, sounds will start playing right away when inserted. Setting this to `true`
+    /// prevents that.
     pub start_paused: bool,
+    /// Volume at which the audio will play at.
     pub volume: f64,
+    /// Panning (in 0..=1) for the sound, where 0 is hard left, and 1 is hard right.
     pub panning: f64,
+    /// Optionally loop a region of the sound (given in seconds)
     pub loop_region: Option<Region>,
+    /// Only play a specific region of the file
     pub play_region: Region,
+    /// Play the file in reverse (not available for streaming sound files)
     pub reverse: bool,
     // pub start_time: StartTime, // TODO: Implement with serializable types
 }
@@ -185,11 +195,14 @@ impl AudioSource for AudioFile {
     }
 }
 
+/// Enum of the possible sound handles that [`kira`] returns
 enum RawAudioHandleImpl {
     Static(StaticSoundHandle),
     Streaming(StreamingSoundHandle<FromFileError>),
 }
 
+/// Handle to an existing audio file. Access this component in your systems to manipulate the
+/// audio in real time (see the `spatial` example to see how to do so).
 pub struct AudioFileHandle(RawAudioHandleImpl);
 
 macro_rules! defer_call {

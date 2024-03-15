@@ -6,14 +6,45 @@
 //! This particular crate is an experiment in making a component-based ECS API, instead of a
 //! resource-based approach, currently taken by `bevy_kira_audio`.
 //!
-//! To get started playing sounds, insert the [`Audio`] component on an entity. The entity will
-//! start playing right away unless [`Audio::start_paused`] is called.
+//! To get started playing sounds, insert an [`AudioBundle`](prelude::AudioBundle) on an entity.
+//! This is a generic bundle which supports any compatible sound source. An implementation over
+//! audio files is provided, with streaming support, using the
+//! [`AudioFileBundle`](prelude::AudioFileBundle) type alias.
 //!
-//! The [`Audio`] component requires an [`AudioFile`], an [`Asset`] which
-//! supports both loading in-memory and streaming the file (only for local assets).
+//! When an [`AudioFile`](prelude::AudioFile) is inserted, its playback will begin right away. To
+//! prevent that, use the [`start_paused`](prelude::AudioFileSettings) field from
+//! [`AudioFileBundle::settings`](prelude::AudioFileBundle::settings) and set it to false.
 //!
-//! Spatial audio is supported built-in with the [`SpatialEmitter`] component, which tells the plugin
-//! to add the entity as an emitter, provided it also has a [`GlobalTransform`] component attached.
+//! The audio system creates an [`AudioHandle`](prelude::AudioHandle) component when registering an
+//! added sound for
+//! playback. This handle allows you to control the sound. For [`AudioFile`](prelude::AudioFile)s,
+//! this means pausing/resuming, setting the volume, panning, and playback rate of the sound.
+//!
+//! Spatial audio is supported built-in with the [`SpatialEmitter`](prelude::SpatialEmitter)
+//! component, which tells the plugin to add the entity as an emitter, provided it also has a
+//! [`GlobalTransform`] component attached. Its settings control the behavior of the spatial effect.
+//!
+//! ## Example
+//!
+//! ```rust
+//! use bevy::prelude::*;
+//! use bevy_kira_components::prelude::*;
+//!
+//! fn main() {
+//!     App::new()
+//!         .add_plugins((DefaultPlugins, AudioPlugin))
+//!         .add_systems(Startup, add_sound)
+//!         .run();
+//! }
+//!
+//! fn add_sound(mut commands: Commands, asset_server: Res<AssetServer>) {
+//!     commands.spawn(AudioFileBundle {
+//!         source: asset_server.load("my_sound.ogg"),
+//!         ..default()
+//!     });
+//! }
+//! ```
+
 use bevy::prelude::*;
 use bevy::transform::TransformSystem;
 pub use kira;
@@ -31,7 +62,9 @@ pub mod sources;
 pub mod spatial;
 pub mod tracks;
 
-#[doc(hidden)]
+/// Prelude.
+/// 
+/// Use as `use bevy_kira_components::prelude::*;` in your own games.
 pub mod prelude {
     pub use super::{AudioPlaybackSet, AudioPlugin, AudioSettings, AudioWorld};
     pub use crate::sources::prelude::*;
@@ -43,13 +76,23 @@ pub mod prelude {
 /// change the default settings.
 pub type AudioSettings = AudioManagerSettings<AudioBackend>;
 
+/// System set used in grouping systems that setup audio sources. Used in the
+/// [`AudioSourcePlugin`](prelude::AudioSourcePlugin)'s systems. Useful to place systems right
+/// after to be able to react to added audio assets.
 #[derive(Debug, Copy, Clone, Eq, PartialEq, Hash, SystemSet)]
 pub struct AudioSourceSetup;
 
+/// General audio system set, used by the systems in this plugin.
 #[derive(Debug, Copy, Clone, Eq, PartialEq, Hash, SystemSet)]
 pub enum AudioPlaybackSet {
+    /// Systems related to setting up audio sources, registering them with the audio engine, and
+    /// bookkeeping handles.
     Setup,
+    /// Systems related to keeping the audio engine in sync with Bevy's world. Mainly used by the
+    /// spatial systems to copy position and rotation information from listeners and emitters.
     Update,
+    /// Systems that clean up resources. Handles that have finished playing or are no longer
+    /// useful, are removed automatically here.
     Cleanup,
 }
 
@@ -95,6 +138,6 @@ impl FromWorld for AudioWorld {
 
 #[derive(Component)]
 #[doc(hidden)]
-/// Internal marker for entities with audio components. Needed to be able to query in a 
+/// Internal marker for entities with audio components. Needed to be able to query in a
 /// non-generic way for having added audio support through the [`AudioBundle`] struct.
 pub struct InternalAudioMarker;
