@@ -6,8 +6,7 @@ use kira::spatial::listener::ListenerHandle;
 use kira::spatial::scene::{SpatialSceneHandle, SpatialSceneSettings};
 use kira::tween::{Easing, Tween};
 
-use crate::sources::audio_file::{AudioFileHandle, SpatialSettings};
-use crate::sources::AudioHandle;
+
 use crate::{AudioPlaybackSet, AudioSourceSetup, AudioWorld, InternalAudioMarker};
 
 #[doc(hidden)]
@@ -145,12 +144,6 @@ fn update_emitters(mut q: Query<(Entity, &mut SpatialEmitterHandle, &GlobalTrans
                 error!("Cannot set spatial audio position for entity {entity:?}: {err}");
             }
         }
-    }
-}
-
-impl Default for SpatialSettings {
-    fn default() -> Self {
-        todo!()
     }
 }
 

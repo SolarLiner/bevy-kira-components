@@ -75,9 +75,6 @@ pub enum AudioFileError {
     FromFileError(#[from] FromFileError),
 }
 
-#[derive(Debug, Deserialize, Serialize)]
-pub struct SpatialSettings {}
-
 #[derive(Debug, Component, Deserialize, Serialize)]
 pub struct AudioFileSettings {
     pub start_paused: bool,
