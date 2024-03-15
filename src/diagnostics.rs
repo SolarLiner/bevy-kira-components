@@ -10,7 +10,7 @@ impl Plugin for KiraStatisticsDiagnosticPlugin {
             .register_diagnostic(Diagnostic::new(NUM_SOUNDS).with_suffix(" sounds"))
             .register_diagnostic(Diagnostic::new(NUM_CLOCKS).with_suffix(" clocks"))
             .register_diagnostic(Diagnostic::new(NUM_MODULATORS).with_suffix(" modulators"))
-            .register_diagnostic(Diagnostic::new(NUM_SPATIAL_SCENES).with_suffix(" spatial_scenes"))
+            .register_diagnostic(Diagnostic::new(NUM_SPATIAL_SCENES).with_suffix(" spatial scenes"))
             .add_systems(Last, record_diagnostics);
     }
 }

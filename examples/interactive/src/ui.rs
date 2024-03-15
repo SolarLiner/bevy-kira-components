@@ -1,7 +1,8 @@
 use crate::InteractiveSound;
 use bevy::app::{App, Plugin};
 use bevy::prelude::*;
-use bevy_kira_components::AudioWorld;
+use bevy_kira_components::prelude::AudioFileHandle;
+use bevy_kira_components::sources::AudioHandle;
 
 pub struct UiPlugin;
 
@@ -49,12 +50,16 @@ fn ui_init(mut commands: Commands) {
 struct PlaybackPos;
 
 fn ui_update(
-    audio_world: Res<AudioWorld>,
     mut q_ui: Query<&mut Text, With<PlaybackPos>>,
-    q_audio: Query<Entity, With<InteractiveSound>>,
+    q_audio: Query<&AudioHandle<AudioFileHandle>, With<InteractiveSound>>,
 ) {
     let mut text = q_ui.single_mut();
-    let entity = q_audio.single();
-    let pos = audio_world.position(entity).unwrap();
-    text.sections[1].value = format!("{pos:2.1} s")
+    let audio_handle_result = q_audio.get_single();
+    match audio_handle_result {
+        Ok(handle) => {
+            let pos = handle.position();
+            text.sections[1].value = format!("{pos:2.1} s");
+        }
+        Err(_) => {}
+    }
 }

@@ -11,6 +11,7 @@ diagnostics-ui = { path = "../diagnostics-ui" }
 
 [dependencies.bevy]
 version = "0.13.0"
+default-features = false
 features = [
     # Copied from bevy with "bevy_audio" removed
     "animation",

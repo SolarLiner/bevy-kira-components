@@ -1,11 +1,13 @@
 use bevy::math::vec3;
 use bevy::prelude::*;
+use bevy::utils::error;
 
-use bevy_kira_components::commands::SetPlaybackRate;
 use bevy_kira_components::kira::sound::{PlaybackRate, Region};
-use bevy_kira_components::kira::tween::Value;
+use bevy_kira_components::kira::tween::{Tween, Value};
+use bevy_kira_components::prelude::*;
+use bevy_kira_components::sources::AudioBundle;
 use bevy_kira_components::spatial::{AudioListener, SpatialEmitter};
-use bevy_kira_components::{Audio, AudioLoaderSettings, AudioPlugin};
+use bevy_kira_components::AudioPlugin;
 use diagnostics_ui::DiagnosticsUiPlugin;
 
 use crate::camera::{CameraPlugin, FpsCam};
@@ -52,6 +54,7 @@ fn init_objects(
     mut materials: ResMut<Assets<StandardMaterial>>,
     asset_server: Res<AssetServer>,
 ) {
+    let source = asset_server.load("drums.ogg");
     // Audio emitter
     commands
         .spawn((
@@ -64,14 +67,16 @@ fn init_objects(
         ))
         .with_children(|children| {
             children.spawn((
-                SpatialEmitter,
                 Doppler(1.0),
-                Audio::new(asset_server.load_with_settings(
-                    "drums.ogg",
-                    |s: &mut AudioLoaderSettings| {
-                        s.looping = Some(Region::from(3.6..6.0));
+                SpatialEmitter::default(),
+                AudioFileBundle {
+                    source,
+                    settings: AudioFileSettings {
+                        loop_region: Some(Region::from(3.6..6.0)),
+                        ..default()
                     },
-                )),
+                    ..default()
+                },
                 PbrBundle {
                     mesh: meshes.add(Sphere::new(0.1).mesh()),
                     material: materials.add(StandardMaterial {
@@ -130,8 +135,15 @@ const SPEED_OF_SOUND: f32 = 20.0;
 
 // Fake the doppler pitch shift effect by playing the loop faster or slower
 fn fake_doppler_effect(
-    mut commands: Commands,
-    mut q: Query<(Entity, &mut Doppler, &GlobalTransform, &Motion), With<SpatialEmitter>>,
+    mut q: Query<
+        (
+            &mut AudioHandle<AudioFileHandle>,
+            &mut Doppler,
+            &GlobalTransform,
+            &Motion,
+        ),
+        With<SpatialEmitter>,
+    >,
     q_cameras: Query<(&GlobalTransform, &Motion), With<FpsCam>>,
 ) {
     let Ok((cam_transform, cam_motion)) = q_cameras.get_single() else {
@@ -139,13 +151,10 @@ fn fake_doppler_effect(
         return;
     };
     let cam_transform = cam_transform.compute_transform();
-    for (entity, mut doppler, transform, motion) in &mut q {
+    for (mut handle, mut doppler, transform, motion) in &mut q {
         let local_dir = Vec3::normalize(cam_transform.translation - transform.translation());
         doppler.0 = (SPEED_OF_SOUND - cam_motion.motion().dot(local_dir))
             / (SPEED_OF_SOUND - motion.motion().dot(local_dir));
-        commands.entity(entity).add(SetPlaybackRate {
-            rate: Value::Fixed(PlaybackRate::Factor(doppler.0 as _)),
-            ..default()
-        });
+        error(handle.set_playback_rate(PlaybackRate::Factor(doppler.0 as _), Tween::default()));
     }
 }
