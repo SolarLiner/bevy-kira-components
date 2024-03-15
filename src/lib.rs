@@ -63,7 +63,7 @@ pub mod spatial;
 pub mod tracks;
 
 /// Prelude.
-/// 
+///
 /// Use as `use bevy_kira_components::prelude::*;` in your own games.
 pub mod prelude {
     pub use super::{AudioPlaybackSet, AudioPlugin, AudioSettings, AudioWorld};

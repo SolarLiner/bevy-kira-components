@@ -21,7 +21,7 @@ pub enum AudioBackendError {
 
 pub enum AudioBackend {
     Physical(CpalBackend),
-    Mock(MockBackend),
+    Mock(Box<MockBackend>),
 }
 
 impl Backend for AudioBackend {
@@ -37,7 +37,7 @@ impl Backend for AudioBackend {
             AudioBackendSelector::Mock { sample_rate } => {
                 let (backend, sample_rate) =
                     MockBackend::setup(MockBackendSettings { sample_rate }).unwrap();
-                Ok((Self::Mock(backend), sample_rate))
+                Ok((Self::Mock(Box::new(backend)), sample_rate))
             }
         }
     }

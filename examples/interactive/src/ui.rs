@@ -55,11 +55,8 @@ fn ui_update(
 ) {
     let mut text = q_ui.single_mut();
     let audio_handle_result = q_audio.get_single();
-    match audio_handle_result {
-        Ok(handle) => {
-            let pos = handle.position();
-            text.sections[1].value = format!("{pos:2.1} s");
-        }
-        Err(_) => {}
+    if let Ok(handle) = audio_handle_result {
+        let pos = handle.position();
+        text.sections[1].value = format!("{pos:2.1} s");
     }
 }

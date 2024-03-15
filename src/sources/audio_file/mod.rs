@@ -2,7 +2,7 @@ use bevy::prelude::*;
 use bevy::utils::error;
 use kira::sound::static_sound::{StaticSoundData, StaticSoundHandle, StaticSoundSettings};
 use std::io::Cursor;
-use std::ops::Range;
+
 use std::path::PathBuf;
 use std::sync::Arc;
 
@@ -10,12 +10,12 @@ use crate::backend::AudioBackend;
 use kira::manager::error::PlaySoundError;
 use kira::manager::AudioManager;
 use kira::sound::streaming::{StreamingSoundData, StreamingSoundHandle, StreamingSoundSettings};
-use kira::sound::{FromFileError, PlaybackRate, PlaybackState, Region, Sound};
+use kira::sound::{FromFileError, PlaybackRate, PlaybackState, Region};
 
 use crate::sources::audio_file::loader::AudioFileLoader;
 use crate::AudioPlaybackSet;
 use kira::tween::{Tween, Value};
-use kira::{CommandError, OutputDestination, StartTime};
+use kira::{CommandError, OutputDestination};
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
@@ -140,8 +140,7 @@ impl AudioSource for AudioFile {
         let start_paused = settings.start_paused;
         match self {
             Self::Static(data, kira_settings) => {
-                let settings = kira_settings
-                    .clone()
+                let settings = (*kira_settings)
                     .output_destination(output_destination)
                     .volume(settings.volume)
                     .panning(settings.panning)
@@ -168,8 +167,7 @@ impl AudioSource for AudioFile {
                 path,
                 settings: kira_settings,
             } => {
-                let settings = kira_settings
-                    .clone()
+                let settings = (*kira_settings)
                     .output_destination(output_destination)
                     .volume(settings.volume)
                     .panning(settings.panning)

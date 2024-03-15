@@ -25,20 +25,12 @@ pub enum AudioFileLoaderError {
 }
 
 /// Settings applied when loading the audio file.
-#[derive(Debug, Copy, Clone, Deserialize, Serialize)]
+#[derive(Debug, Copy, Clone, Deserialize, Serialize, Default)]
 pub struct AudioAssetSettings {
     /// Whether the loader should read the entire file into memory, or only load it on demand
     /// during playback. Note that some features are not available when a file is streamed from
     /// disk, and streaming is only available on desktop platforms.
     pub should_stream: bool,
-}
-
-impl Default for AudioAssetSettings {
-    fn default() -> Self {
-        Self {
-            should_stream: false,
-        }
-    }
 }
 
 impl AssetLoader for AudioFileLoader {

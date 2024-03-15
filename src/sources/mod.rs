@@ -2,15 +2,11 @@ pub mod audio_file;
 
 use crate::backend::AudioBackend;
 use crate::spatial::SpatialEmitterHandle;
-use crate::tracks::Track;
+
 use crate::{AudioPlaybackSet, AudioSourceSetup, AudioWorld, InternalAudioMarker};
 use bevy::prelude::*;
 use kira::manager::AudioManager;
-use kira::sound::{PlaybackRate, PlaybackState, Region, SoundData};
-use kira::spatial::emitter::{EmitterHandle, EmitterSettings};
-use kira::track::TrackHandle;
-use kira::tween::{Tween, Value};
-use kira::CommandError;
+
 use std::fmt;
 use std::marker::PhantomData;
 
@@ -110,6 +106,7 @@ impl<T: AudioSource> Default for AudioBundle<T> {
 }
 
 impl<T: AudioSource> AudioSourcePlugin<T> {
+    #[allow(clippy::type_complexity)]
     fn audio_added(
         mut commands: Commands,
         mut audio_world: ResMut<AudioWorld>,
