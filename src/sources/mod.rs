@@ -110,6 +110,7 @@ impl<T: AudioSource> AudioSourcePlugin<T> {
     fn audio_added(
         mut commands: Commands,
         mut audio_world: ResMut<AudioWorld>,
+        asset_server: Res<AssetServer>,
         assets: Res<Assets<T>>,
         q_added: Query<
             (
@@ -143,11 +144,13 @@ impl<T: AudioSource> AudioSourcePlugin<T> {
                 };
                 kira::OutputDestination::Track(output_handle.id())
             };
-            let result = assets.get(source).unwrap().create_handle(
-                &mut audio_world.audio_manager,
-                settings,
-                output_destination,
-            );
+            let result = match assets.get(source) {
+                Some(asset) if asset_server.is_loaded_with_dependencies(source) => asset
+                    .create_handle(&mut audio_world.audio_manager, settings, output_destination),
+                _ => {
+                    continue;
+                } // Asset not ready, wait
+            };
             let handle = match result {
                 Ok(handle) => handle,
                 Err(err) => {

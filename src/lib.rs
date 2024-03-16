@@ -32,6 +32,11 @@
 //!
 //! fn main() {
 //!     App::new()
+//!         .insert_non_send_resource(AudioSettings {
+//!             // Only needed for tests
+//!             backend_settings: AudioBackendSelector::Mock { sample_rate: 48000, },
+//!             ..default()
+//!         })
 //!         .add_plugins((DefaultPlugins, AudioPlugin))
 //!         .add_systems(Startup, add_sound)
 //!         .run();
@@ -67,6 +72,7 @@ pub mod tracks;
 /// Use as `use bevy_kira_components::prelude::*;` in your own games.
 pub mod prelude {
     pub use super::{AudioPlaybackSet, AudioPlugin, AudioSettings, AudioWorld};
+    pub use crate::backend::*;
     pub use crate::sources::prelude::*;
     pub use crate::spatial::prelude::*;
     pub use crate::tracks::prelude::*;
