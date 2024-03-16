@@ -145,9 +145,10 @@ impl<T: AudioSource> AudioSourcePlugin<T> {
                 kira::OutputDestination::Track(output_handle.id())
             };
             let result = match assets.get(source) {
-                Some(asset) if asset_server.is_loaded_with_dependencies(source) => asset
+                Some(asset) if asset_server.is_loaded_with_dependencies(source) || !asset_server.is_managed(source) => asset
                     .create_handle(&mut audio_world.audio_manager, settings, output_destination),
                 _ => {
+                    debug!("Asset not ready");
                     continue;
                 } // Asset not ready, wait
             };
@@ -158,6 +159,7 @@ impl<T: AudioSource> AudioSourcePlugin<T> {
                     return;
                 }
             };
+            debug!("Added sound for {} in {entity:?}", T::type_path());
             commands.entity(entity).insert(AudioHandle(handle));
         }
     }

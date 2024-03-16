@@ -1,4 +1,8 @@
-workspace = { members = [ "examples/diagnostics-ui","examples/interactive", "examples/spatial"] }
+[workspace]
+members = [
+    "examples/*"
+]
+
 [package]
 name = "bevy-kira-components"
 version = "0.1.0"
