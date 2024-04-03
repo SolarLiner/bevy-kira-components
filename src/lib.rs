@@ -49,6 +49,7 @@
 //!     });
 //! }
 //! ```
+#[warn(missing_docs)]
 
 use bevy::prelude::*;
 use bevy::transform::TransformSystem;
@@ -111,6 +112,7 @@ impl Plugin for AudioPlugin {
         app.init_resource::<AudioWorld>()
             .add_plugins((
                 AudioTracksPlugin,
+                #[cfg(feature = "diagnostics")]
                 KiraStatisticsDiagnosticPlugin,
                 SpatialAudioPlugin,
                 AudioFilePlugin,
@@ -124,8 +126,6 @@ impl Plugin for AudioPlugin {
 }
 
 /// Main resource holding all the bookkeeping necessary to link the ECS data to the audio engine.
-/// As a user, you'll want to use this to query information on the current audio engine settings, as
-/// well as properties on audio entities.
 #[derive(Resource)]
 pub struct AudioWorld {
     pub(crate) audio_manager: AudioManager<AudioBackend>,

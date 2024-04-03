@@ -1,5 +1,7 @@
+#![cfg(feature = "diagnostics")]
 use crate::AudioWorld;
 use bevy::diagnostic::{Diagnostic, DiagnosticPath, Diagnostics, RegisterDiagnostic};
+
 use bevy::prelude::*;
 
 pub struct KiraStatisticsDiagnosticPlugin;

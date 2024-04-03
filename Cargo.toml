@@ -19,3 +19,7 @@ serde = { version = "1.0.197", features = ["derive"] }
 version = "0.13.0"
 default-features = false
 features = ["bevy_asset"]
+
+[features]
+default = []
+diagnostics = []
