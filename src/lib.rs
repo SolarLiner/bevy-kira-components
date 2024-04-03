@@ -57,7 +57,6 @@ pub use kira;
 use kira::manager::{AudioManager, AudioManagerSettings};
 
 use crate::backend::AudioBackend;
-use crate::diagnostics::KiraStatisticsDiagnosticPlugin;
 use crate::sources::audio_file::AudioFilePlugin;
 use crate::spatial::SpatialAudioPlugin;
 use crate::tracks::AudioTracksPlugin;
@@ -113,7 +112,7 @@ impl Plugin for AudioPlugin {
             .add_plugins((
                 AudioTracksPlugin,
                 #[cfg(feature = "diagnostics")]
-                KiraStatisticsDiagnosticPlugin,
+                diagnostics::KiraStatisticsDiagnosticPlugin,
                 SpatialAudioPlugin,
                 AudioFilePlugin,
             ))
