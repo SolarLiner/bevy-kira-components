@@ -70,7 +70,8 @@ impl Sound for SineWaveSound {
         if self.phase > 1. {
             self.phase -= 1.;
         }
-        let sample = 0.25 * f32::sin(TAU * self.phase); // 12 dB reduction to make it not saturate
+        // 24 dB reduction to not blast the user's speakers (and ears)
+        let sample = 0.125 * f32::sin(TAU * self.phase);
 
         // Return the new stereo sample
         kira::dsp::Frame { left: sample, right: sample }

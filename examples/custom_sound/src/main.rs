@@ -16,9 +16,14 @@ fn main() {
             SineWavePlugin,
             DiagnosticsUiPlugin,
         ))
+        .add_systems(Startup, setup_ui)
         .add_systems(Startup, add_sounds)
         .add_systems(PostUpdate, control_sounds)
         .run();
+}
+
+fn setup_ui(mut commands: Commands) {
+    commands.spawn(Camera2dBundle::default());
 }
 
 #[derive(Component)]
