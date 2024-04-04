@@ -6,7 +6,7 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-bevy-kira-components = { path = "../.." }
+bevy-kira-components = { path = "../..", features = ["diagnostics"] }
 diagnostics-ui = { path = "../diagnostics-ui" }
 ringbuf = "0.3.3"
 
