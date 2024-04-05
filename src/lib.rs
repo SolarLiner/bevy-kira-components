@@ -49,7 +49,7 @@
 //!     });
 //! }
 //! ```
-#[warn(missing_docs)]
+#![warn(missing_docs)]
 
 use bevy::prelude::*;
 use bevy::transform::TransformSystem;
