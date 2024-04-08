@@ -1,9 +1,11 @@
+//! Register diagnostics regarding statistics of `Kira`'s audio engine usage.
 #![cfg(feature = "diagnostics")]
 use crate::AudioWorld;
 use bevy::diagnostic::{Diagnostic, DiagnosticPath, Diagnostics, RegisterDiagnostic};
 
 use bevy::prelude::*;
 
+/// Register diagnostics regarding statistics of `Kira`'s audio engine usage.
 pub struct KiraStatisticsDiagnosticPlugin;
 
 impl Plugin for KiraStatisticsDiagnosticPlugin {

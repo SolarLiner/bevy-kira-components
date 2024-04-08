@@ -1,3 +1,4 @@
+//! Implementations of different audio sources.
 pub mod audio_file;
 
 use crate::backend::AudioBackend;
@@ -28,8 +29,13 @@ pub mod prelude {
 /// The trait supports a `Settings` struct, which allows users to customize the sound that will
 /// be sent before its creation.
 pub trait AudioSource: Asset {
+    /// Error type that encompasses possible errors that can happen when creating the audio source
     type Error: fmt::Display;
+    /// Handle to the audio source, which allows control over the source from a non-audio thread.
+    ///
+    /// This handle will be stored in a component, which you can get by querying for `AudioHandle<Self::Handle>`.
     type Handle: 'static + Send + Sync;
+    /// Settings associated with this audio source, and passed in to the source for its creation.
     type Settings: Send + Sync + Default + Component;
 
     /// Create an audio handle by calling the manager to play the sound data.
@@ -145,8 +151,16 @@ impl<T: AudioSource> AudioSourcePlugin<T> {
                 kira::OutputDestination::Track(output_handle.id())
             };
             let result = match assets.get(source) {
-                Some(asset) if asset_server.is_loaded_with_dependencies(source) || !asset_server.is_managed(source) => asset
-                    .create_handle(&mut audio_world.audio_manager, settings, output_destination),
+                Some(asset)
+                    if asset_server.is_loaded_with_dependencies(source)
+                        || !asset_server.is_managed(source) =>
+                {
+                    asset.create_handle(
+                        &mut audio_world.audio_manager,
+                        settings,
+                        output_destination,
+                    )
+                }
                 _ => {
                     debug!("Asset not ready");
                     continue;

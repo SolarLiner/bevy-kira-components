@@ -1,14 +1,18 @@
+//! Implementation of tracks support.
 use bevy::prelude::*;
 
 use crate::{AudioPlaybackSet, AudioWorld};
+
 use kira::track::TrackBuilder;
 
 #[doc(hidden)]
+#[allow(missing_docs)]
 pub mod prelude {
     pub use super::{EffectHandle, MainTrack, OutputTrack, Track};
 }
 
-pub struct AudioTracksPlugin;
+/// Plugin for adding support to using tracks with Kira in Bevy.
+pub(crate) struct AudioTracksPlugin;
 
 impl Plugin for AudioTracksPlugin {
     fn build(&self, app: &mut App) {

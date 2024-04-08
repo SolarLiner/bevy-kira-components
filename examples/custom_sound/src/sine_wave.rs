@@ -1,8 +1,17 @@
-use std::{f32::consts::TAU, convert::Infallible};
+use std::{convert::Infallible, f32::consts::TAU};
 
 use bevy::prelude::*;
-use bevy_kira_components::{kira::{tween::{Value, Parameter, Tween}, sound::{Sound, SoundData}, self, manager::error::PlaySoundError}, sources::AudioSourcePlugin, prelude::*};
 use bevy_kira_components::sources::AudioSource;
+use bevy_kira_components::{
+    kira::{
+        self,
+        manager::error::PlaySoundError,
+        sound::{Sound, SoundData},
+        tween::{Parameter, Tween, Value},
+    },
+    prelude::*,
+    sources::AudioSourcePlugin,
+};
 use ringbuf::{HeapConsumer, HeapProducer, HeapRb};
 
 pub struct SineWavePlugin;
@@ -51,11 +60,11 @@ impl Sound for SineWaveSound {
     }
 
     fn process(
-		    &mut self,
-		    dt: f64,
-		    clock_info_provider: &bevy_kira_components::kira::clock::clock_info::ClockInfoProvider,
-		    modulator_value_provider: &bevy_kira_components::kira::modulator::value_provider::ModulatorValueProvider,
-	    ) -> bevy_kira_components::kira::dsp::Frame {
+        &mut self,
+        dt: f64,
+        clock_info_provider: &bevy_kira_components::kira::clock::clock_info::ClockInfoProvider,
+        modulator_value_provider: &bevy_kira_components::kira::modulator::value_provider::ModulatorValueProvider,
+    ) -> bevy_kira_components::kira::dsp::Frame {
         // Receive and perform commands
         while let Some(command) = self.commands.pop() {
             match command {
@@ -64,7 +73,8 @@ impl Sound for SineWaveSound {
         }
 
         // Compute next sample of the sine wave
-        self.frequency.update(dt, clock_info_provider, modulator_value_provider);
+        self.frequency
+            .update(dt, clock_info_provider, modulator_value_provider);
         let step = self.frequency.value() * dt as f32;
         self.phase += step;
         if self.phase > 1. {
@@ -74,7 +84,10 @@ impl Sound for SineWaveSound {
         let sample = 0.125 * f32::sin(TAU * self.phase);
 
         // Return the new stereo sample
-        kira::dsp::Frame { left: sample, right: sample }
+        kira::dsp::Frame {
+            left: sample,
+            right: sample,
+        }
     }
 
     fn finished(&self) -> bool {
@@ -84,7 +97,11 @@ impl Sound for SineWaveSound {
 
 impl SineWaveSound {
     /// Create a new [`SineWaveSound`] with the provided command buffer and frequency
-    fn new(commands: HeapConsumer<SineWaveCommand>, output: kira::OutputDestination, initial_frequency: f32) -> Self {
+    fn new(
+        commands: HeapConsumer<SineWaveCommand>,
+        output: kira::OutputDestination,
+        initial_frequency: f32,
+    ) -> Self {
         Self {
             output,
             commands,
@@ -96,7 +113,7 @@ impl SineWaveSound {
 
 /// Handle for sine wave sounds. Allows setting the frequency.
 pub struct SineWaveHandle {
-    commands: HeapProducer<SineWaveCommand>, 
+    commands: HeapProducer<SineWaveCommand>,
 }
 
 impl SineWaveHandle {
@@ -105,7 +122,10 @@ impl SineWaveHandle {
             error!("Cannot send command: command queue is full");
             return;
         }
-        assert!(self.commands.push(SineWaveCommand::SetFrequency(frequency.into(), tween)).is_ok());
+        assert!(self
+            .commands
+            .push(SineWaveCommand::SetFrequency(frequency.into(), tween))
+            .is_ok());
     }
 }
 
@@ -125,7 +145,11 @@ impl SoundData for SineWaveData {
 
     fn into_sound(self) -> Result<(Box<dyn Sound>, Self::Handle), Self::Error> {
         let (producer, consumer) = HeapRb::new(16).split();
-        let sound = Box::new(SineWaveSound::new(consumer, self.output_destination, self.intial_frequency));
+        let sound = Box::new(SineWaveSound::new(
+            consumer,
+            self.output_destination,
+            self.intial_frequency,
+        ));
         let handle = SineWaveHandle { commands: producer };
         Ok((sound, handle))
     }

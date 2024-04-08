@@ -1,3 +1,9 @@
+//! Asset loader implementation for the [`AudioFile`] type.
+//!
+//! This loader either loads the audio data fully into memory, or simply copies the path into the asset, as kira has
+//! its own file streaming features.
+//!
+//! This means that the streaming feature is only available on desktop platforms, and not on the web.
 use bevy::asset::io::Reader;
 use bevy::asset::{AssetLoader, AsyncReadExt, LoadContext};
 use bevy::utils::BoxedFuture;
@@ -9,6 +15,7 @@ use thiserror::Error;
 
 use crate::sources::audio_file::AudioFile;
 
+/// Loads an [`AudioFile`].
 #[derive(Default)]
 pub struct AudioFileLoader;
 

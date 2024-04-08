@@ -1,3 +1,4 @@
+//! Support for spatial audio through `kira`'s spatial features.
 use bevy::diagnostic::{Diagnostic, DiagnosticPath, RegisterDiagnostic};
 use bevy::prelude::*;
 
@@ -9,6 +10,7 @@ use kira::tween::{Easing, Tween};
 use crate::{AudioPlaybackSet, AudioSourceSetup, AudioWorld, InternalAudioMarker};
 
 #[doc(hidden)]
+#[allow(missing_docs)]
 pub mod prelude {
     pub use super::{AudioListener, SpatialEmitter, SpatialWorld};
 }
@@ -161,7 +163,9 @@ fn update_emitters(mut q: Query<(Entity, &mut SpatialEmitterHandle, &GlobalTrans
     }
 }
 
+/// Bevy diagnostic path recording the number of emitters present.
 pub const SPATIAL_EMITTERS: DiagnosticPath = DiagnosticPath::const_new("kira::spatial::emitters");
+/// Bevy diagnostic path recording the number of listeners present.
 pub const SPATIAL_LISTENERS: DiagnosticPath = DiagnosticPath::const_new("kira::spatial::listeners");
 
 struct SpatialDiagnosticsPlugin;

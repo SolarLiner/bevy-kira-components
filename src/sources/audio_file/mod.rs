@@ -1,3 +1,12 @@
+//! Audio source implementation for audio files.
+//!
+//! This implementation wraps both `StaticSound` and `StreamingSound`, to allow for better defaults around streaming
+//! like having a size threshold, beyond which the file is kept on disk instead of loaded into memory in its entirety.
+//! (note that this is not yet implemented).
+//!
+//! Specifying if the asset is streamed or not is part of the loader settings, which can be changed in `.meta` files,
+//! or specified with [`AssetServer::load_with_settings`].
+
 use bevy::prelude::*;
 use bevy::utils::error;
 use kira::sound::static_sound::{StaticSoundData, StaticSoundHandle, StaticSoundSettings};
@@ -24,6 +33,7 @@ use super::{AudioBundle, AudioHandle, AudioSource, AudioSourcePlugin};
 pub mod loader;
 
 #[doc(hidden)]
+#[allow(missing_docs)]
 pub mod prelude {
     pub use super::loader::*;
     pub use super::{
@@ -31,6 +41,7 @@ pub mod prelude {
     };
 }
 
+/// Specialization of [`AudioBundle`] for the [`AudioFile`] asset.
 pub type AudioFileBundle = AudioBundle<AudioFile>;
 
 /// Implementation of an audio source using the Static and Streaming file data from [`kira`].
@@ -63,9 +74,13 @@ fn audio_finished(
 /// all audio sources need to be [`Static`](Self::Static).
 #[derive(Asset, Clone, TypePath)]
 pub enum AudioFile {
+    /// Static audio data, fully loaded in memory.
     Static(Arc<[u8]>, StaticSoundSettings),
+    /// Streaming audio data, pointing to a path on disk and loaded on demand.
     Streaming {
+        /// Path to the audio file being read
         path: PathBuf,
+        /// Settings for the streaming audio file
         settings: StreamingSoundSettings,
     },
 }
@@ -73,6 +88,7 @@ pub enum AudioFile {
 /// Enumeration of possible errors when loading an audio file.
 #[derive(Debug, Error)]
 pub enum AudioFileError {
+    /// Error comes from trying to load the file for streaming
     #[error(transparent)]
     FromFileError(#[from] FromFileError),
 }
@@ -209,6 +225,7 @@ macro_rules! defer_call {
     };
     // Don't know how to parametrize the `mut` and be able to factor these two into one variant
     (fn $name:ident :: $fnname:ident(&self $(, $argname:ident: $argtype:ty)*) -> $ret:ty) => {
+       /// Forward a call to [`StaticSoundHandle::$name`] or [`StreamingSoundHandle::$name`] .
        pub fn $fnname(&self, $($argname: $argtype),*) -> $ret {
             match self {
                 Self(RawAudioHandleImpl::Static(handle)) => handle.$name($($argname),*),
@@ -217,6 +234,7 @@ macro_rules! defer_call {
         }
     };
     (fn $name:ident(&mut self $(, $argname:ident: $argtype:ty)*) -> $ret:ty) => {
+        /// Forward a call to [`StaticSoundHandle::$name`] or [`StreamingSoundHandle::$name`] .
         pub fn $name(&mut self, $($argname: $argtype),*) -> $ret {
             match self {
                 Self(RawAudioHandleImpl::Static(handle)) => handle.$name($($argname),*),
