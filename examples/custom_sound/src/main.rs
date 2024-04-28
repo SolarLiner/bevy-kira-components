@@ -41,6 +41,7 @@ fn add_sounds(mut commands: Commands, mut sine_waves: ResMut<Assets<SineWave>>) 
     ));
 }
 
+#[allow(clippy::type_complexity)]
 fn control_sounds(
     mut q: Query<
         &mut AudioHandle<SineWaveHandle>,
