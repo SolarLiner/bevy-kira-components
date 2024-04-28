@@ -81,8 +81,6 @@ pub enum OutputDestination {
     /// Send the audio data to the main track (default)
     #[default]
     MainOutput,
-    /// Send the audio data to the track attached to the given entity
-    SpecificTrack(Entity),
 }
 
 /// [`Bundle`] for easy creation of audio sources.
@@ -128,7 +126,6 @@ impl<T: AudioSource> AudioSourcePlugin<T> {
             ),
             Without<AudioHandle<T::Handle>>,
         >,
-        q_track: Query<&crate::tracks::TrackHandle>,
     ) {
         let main_track_handle = audio_world.audio_manager.main_track();
         for (entity, source, settings, spatial_emitter, output_destination) in &q_added {
@@ -137,16 +134,6 @@ impl<T: AudioSource> AudioSourcePlugin<T> {
             } else {
                 let output_handle = match output_destination {
                     OutputDestination::MainOutput => &main_track_handle,
-                    OutputDestination::SpecificTrack(entity) => match q_track.get(*entity) {
-                        Ok(crate::tracks::TrackHandle(handle)) => handle,
-                        _ => {
-                            error!(
-                                "Entity {entity:?} does not have a Track component, sending \
-                            audio to main output instead"
-                            );
-                            &main_track_handle
-                        }
-                    },
                 };
                 kira::OutputDestination::Track(output_handle.id())
             };

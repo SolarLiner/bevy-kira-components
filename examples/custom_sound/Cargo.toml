@@ -2,8 +2,7 @@
 name = "custom_sound"
 version = "0.1.0"
 edition = "2021"
-
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+publish = false
 
 [dependencies]
 bevy-kira-components = { path = "../..", features = ["diagnostics"] }
@@ -39,9 +38,6 @@ features = [
     "webgl2",
     "bevy_debug_stepping",
 ]
-
-[profile.dev.packages.bevy]
-opt-level = 3
 
 [features]
 default = ["dev"]

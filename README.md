@@ -1,5 +1,6 @@
 # Bevy <-> Kira as Components
 
+![Crates.io Version](https://img.shields.io/crates/v/bevy-kira-components)
 ![GitHub License](https://img.shields.io/github/license/solarliner/bevy-kira-components)
 ![GitHub Actions Workflow Status](https://img.shields.io/github/actions/workflow/status/solarliner/bevy-kira-components/ci.yml)
 [![Link to docs](https://img.shields.io/badge/docs-url-blue)](https://solarliner.dev/bevy-kira-components/bevy_kira_components/)
@@ -10,7 +11,5 @@ This repository is an experiment in coming up with an alternative API for the in
 ## Features
 
 - Audio as components
-- Tracks as components
-- Track effects as components
-- Support for routing audio to tracks
+- Static and streaming audio sources
 - Support for spatial scenes

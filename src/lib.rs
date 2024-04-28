@@ -59,13 +59,11 @@ use kira::manager::{AudioManager, AudioManagerSettings};
 use crate::backend::AudioBackend;
 use crate::sources::audio_file::AudioFilePlugin;
 use crate::spatial::SpatialAudioPlugin;
-use crate::tracks::AudioTracksPlugin;
 
 mod backend;
 pub mod diagnostics;
 pub mod sources;
 pub mod spatial;
-pub mod tracks;
 
 #[doc(hidden)]
 #[allow(missing_docs)]
@@ -74,7 +72,6 @@ pub mod prelude {
     pub use crate::backend::*;
     pub use crate::sources::prelude::*;
     pub use crate::spatial::prelude::*;
-    pub use crate::tracks::prelude::*;
 }
 
 /// Type of settings for the audio engine. Insert it as a resource before adding the plugin to
@@ -109,7 +106,6 @@ impl Plugin for AudioPlugin {
     fn build(&self, app: &mut App) {
         app.init_resource::<AudioWorld>()
             .add_plugins((
-                AudioTracksPlugin,
                 #[cfg(feature = "diagnostics")]
                 diagnostics::KiraStatisticsDiagnosticPlugin,
                 SpatialAudioPlugin,
