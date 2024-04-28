@@ -10,7 +10,5 @@ This repository is an experiment in coming up with an alternative API for the in
 ## Features
 
 - Audio as components
-- Tracks as components
-- Track effects as components
-- Support for routing audio to tracks
+- Static and streaming audio sources
 - Support for spatial scenes
