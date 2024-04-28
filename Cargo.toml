@@ -7,7 +7,6 @@ members = [
 name = "bevy-kira-components"
 description = "Alternative crate for Bevy integration of Kira"
 license = "MIT"
-license-file = "LICENSE"
 homepage = "https://github.com/solarliner/bevy-kira-components"
 repository = "https://github.com/solarliner/bevy-kira-components.git"
 version = "0.1.0"
