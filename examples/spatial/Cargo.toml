@@ -38,9 +38,6 @@ features = [
     "bevy_debug_stepping",
 ]
 
-[profile.dev.packages.bevy]
-opt-level = 3
-
 [features]
 default = ["dev"]
 dev = [
