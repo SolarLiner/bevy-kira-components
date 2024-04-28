@@ -34,7 +34,7 @@ pub enum AudioBackendError {
 pub enum AudioBackend {
     /// Physical backend that connects the audio engine to an actual audio output
     Physical(CpalBackend),
-    // Mock backend which provides ways to manually drive the output stream
+    /// Mock backend which provides ways to manually drive the output stream
     Mock(Box<MockBackend>),
 }
 
