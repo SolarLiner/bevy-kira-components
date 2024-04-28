@@ -24,7 +24,7 @@ use kira::sound::{FromFileError, PlaybackRate, PlaybackState, Region};
 use crate::sources::audio_file::loader::AudioFileLoader;
 use crate::AudioPlaybackSet;
 use kira::tween::{Tween, Value};
-use kira::{CommandError, OutputDestination};
+use kira::{CommandError, OutputDestination, Volume};
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
@@ -225,7 +225,9 @@ macro_rules! defer_call {
     };
     // Don't know how to parametrize the `mut` and be able to factor these two into one variant
     (fn $name:ident :: $fnname:ident(&self $(, $argname:ident: $argtype:ty)*) -> $ret:ty) => {
-       /// Forward a call to [`StaticSoundHandle::$name`] or [`StreamingSoundHandle::$name`] .
+       /// Forwarded call to [`StaticSoundHandle`] or [`StreamingSoundHandle`].
+       ///
+       /// Note: Documentation cannot be provided directly due to limitations with docs in macros.
        pub fn $fnname(&self, $($argname: $argtype),*) -> $ret {
             match self {
                 Self(RawAudioHandleImpl::Static(handle)) => handle.$name($($argname),*),
@@ -234,7 +236,9 @@ macro_rules! defer_call {
         }
     };
     (fn $name:ident(&mut self $(, $argname:ident: $argtype:ty)*) -> $ret:ty) => {
-        /// Forward a call to [`StaticSoundHandle::$name`] or [`StreamingSoundHandle::$name`] .
+       /// Forwarded call to [`StaticSoundHandle`] or [`StreamingSoundHandle`].
+       ///
+       /// Note: Documentation cannot be provided directly due to limitations with docs in macros.
         pub fn $name(&mut self, $($argname: $argtype),*) -> $ret {
             match self {
                 Self(RawAudioHandleImpl::Static(handle)) => handle.$name($($argname),*),
@@ -248,9 +252,10 @@ impl AudioFileHandle {
     defer_call!(fn state :: playback_state(&self) -> PlaybackState);
     defer_call!(fn position(&self) -> f64);
     defer_call!(fn set_playback_rate(&mut self, rate: impl Into<Value<PlaybackRate>>, tween: Tween) -> Result<(), CommandError>);
-    defer_call!(fn set_panning(&mut self, panning: impl Into<Value<f64>>, tween: Tween) ->Result<(), CommandError>);
+    defer_call!(fn set_panning(&mut self, panning: impl Into<Value<f64>>, tween: Tween) -> Result<(), CommandError>);
     defer_call!(fn set_playback_region(&mut self, region: impl Into<Region>) -> Result<(), CommandError>);
     defer_call!(fn set_loop_region(&mut self, region: impl Into<Region>) -> Result<(), CommandError>);
+    defer_call!(fn set_volume(&mut self, volume: impl Into<Value<Volume>>, tween: Tween) -> Result<(), CommandError>);
     defer_call!(fn pause(&mut self, tween: Tween) -> Result<(), CommandError>);
     defer_call!(fn resume(&mut self, tween: Tween) -> Result<(), CommandError>);
     defer_call!(fn stop(&mut self, tween: Tween) -> Result<(), CommandError>);
