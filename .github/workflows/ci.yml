@@ -84,9 +84,10 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 30
     needs: ["clippy"]
+    if: github.event_name == 'push'
     environment:
       name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}/valib
+      url: ${{ steps.deployment.outputs.page_url }}/bevy_kira_components
     permissions:
       id-token: write
       pages: write

@@ -7,6 +7,7 @@
       <sourceFolder url="file://$MODULE_DIR$/examples/interactive/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/examples/spatial/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/examples/custom_sound/src" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/target" />
     </content>
     <orderEntry type="inheritedJdk" />
