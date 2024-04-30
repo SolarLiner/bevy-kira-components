@@ -13,7 +13,7 @@ use kira::sound::FromFileError;
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
-use crate::sources::audio_file::AudioFile;
+use crate::sources::audio_file::source::AudioFile;
 
 /// Loads an [`AudioFile`].
 #[derive(Default)]

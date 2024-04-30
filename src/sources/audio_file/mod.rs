@@ -9,10 +9,14 @@
 
 use bevy::prelude::*;
 use kira::manager::error::PlaySoundError;
+use kira::sound::{FromFileError, PlaybackState, Region};
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
-use super::{AudioBundle, AudioHandle, AudioSource, AudioSourcePlugin};
+use crate::AudioPlaybackSet;
+use crate::prelude::{AudioFile, AudioFileHandle, AudioFileLoader};
+
+use super::{AudioBundle, AudioHandle, AudioSourcePlugin};
 
 pub mod loader;
 pub mod source;
@@ -20,10 +24,10 @@ pub mod source;
 #[doc(hidden)]
 #[allow(missing_docs)]
 pub mod prelude {
-    pub use super::loader::*;
     pub use super::{
-        AudioFile, AudioFileBundle, AudioFileError, AudioFileHandle, AudioFileSettings,
+        AudioFileBundle, AudioFileEndBehavior, AudioFileError, AudioFileSettings,
     };
+    pub use super::loader::*;
     pub use super::source::*;
 }
 
@@ -37,19 +41,54 @@ impl Plugin for AudioFilePlugin {
     fn build(&self, app: &mut App) {
         app.init_asset_loader::<AudioFileLoader>()
             .add_plugins(AudioSourcePlugin::<AudioFile>::default())
-            .add_systems(PostUpdate, audio_finished.in_set(AudioPlaybackSet::Cleanup));
+            .add_systems(
+                PostUpdate,
+                on_audio_file_ended.in_set(AudioPlaybackSet::Cleanup),
+            );
     }
 }
 
-fn audio_finished(
+/// Describe how the audio components (and entity) will react to the audio source reaching the
+/// end of the file.
+#[derive(Debug, Copy, Clone, Component, Default)]
+#[component(storage = "SparseSet")]
+pub enum AudioFileEndBehavior {
+    /// Do nothing. This is the default behavior.
+    #[default]
+    Nothing,
+    /// Remove all components in the [`AudioFileBundle`]. This will also clean up audio resources.
+    RemoveComponents,
+    /// Despawn the entity as a whole. This is only useful for cases where the entity *only*
+    /// serves as an audio source, will yeet your entity out of the world.
+    Despawn {
+        /// Despawning this entity will also despawn all children.
+        recursive: bool,
+    },
+}
+
+fn on_audio_file_ended(
     mut commands: Commands,
-    q_sources: Query<(Entity, &AudioHandle<AudioFileHandle>)>,
+    q_sources: Query<(
+        Entity,
+        &AudioHandle<AudioFileHandle>,
+        Option<&AudioFileEndBehavior>,
+    )>,
 ) {
-    for (entity, AudioHandle(handle)) in &q_sources {
+    for (entity, AudioHandle(handle), end_behavior) in &q_sources {
         if matches!(handle.playback_state(), PlaybackState::Stopped) {
-            commands
-                .entity(entity)
-                .remove::<AudioHandle<AudioFileHandle>>();
+            match end_behavior.copied().unwrap_or_default() {
+                AudioFileEndBehavior::Nothing => {}
+                AudioFileEndBehavior::RemoveComponents => {
+                    commands.entity(entity).remove::<AudioFileBundle>();
+                }
+                AudioFileEndBehavior::Despawn { recursive } => {
+                    if recursive {
+                        commands.entity(entity).despawn_recursive();
+                    } else {
+                        commands.entity(entity).despawn();
+                    }
+                }
+            }
         }
     }
 }
