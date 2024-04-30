@@ -3,8 +3,9 @@ use bevy::utils::error;
 
 use bevy_kira_components::kira::sound::Region;
 use bevy_kira_components::kira::tween::Tween;
-use bevy_kira_components::prelude::AudioBundle;
 use bevy_kira_components::prelude::*;
+use bevy_kira_components::prelude::AudioBundle;
+use bevy_kira_components::sources::audio_file::AudioFileEndBehavior;
 use diagnostics_ui::DiagnosticsUiPlugin;
 
 use crate::ui::UiPlugin;
@@ -51,9 +52,20 @@ fn init(mut commands: Commands, asset_server: Res<AssetServer>) {
 }
 
 fn handle_interactive_sound(
+    mut commands: Commands,
+    asset_server: Res<AssetServer>,
     keyboard: Res<ButtonInput<KeyCode>>,
     mut q: Query<(&mut AudioHandle<AudioFileHandle>, &mut Sprite), With<InteractiveSound>>,
 ) {
+    if keyboard.just_pressed(KeyCode::KeyA) {
+        commands.spawn((
+            AudioFileBundle {
+                source: asset_server.load("click.wav"),
+                ..default()
+            },
+            AudioFileEndBehavior::Despawn { recursive: false },
+        ));
+    }
     if keyboard.just_pressed(KeyCode::Space) {
         for (mut handle, mut sprite) in &mut q {
             error(handle.resume(Tween::default()));

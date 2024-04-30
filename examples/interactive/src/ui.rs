@@ -1,8 +1,10 @@
-use crate::InteractiveSound;
 use bevy::app::{App, Plugin};
 use bevy::prelude::*;
-use bevy_kira_components::prelude::AudioFileHandle;
+
+use bevy_kira_components::sources::audio_file::source::AudioFileHandle;
 use bevy_kira_components::sources::AudioHandle;
+
+use crate::InteractiveSound;
 
 pub struct UiPlugin;
 
@@ -30,7 +32,10 @@ fn ui_init(mut commands: Commands) {
                 ..default()
             };
             children.spawn(TextBundle {
-                text: Text::from_section("Hold Space to play sound", style.clone()),
+                text: Text::from_section(
+                    "Hold Space to play a looping sound, press A (on QWERTY keyboards) to send a one-shot sound",
+                    style.clone(),
+                ),
                 ..default()
             });
             children.spawn((
