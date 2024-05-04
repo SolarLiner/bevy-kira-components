@@ -13,8 +13,8 @@ use kira::sound::{FromFileError, PlaybackState, Region};
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
-use crate::AudioPlaybackSet;
 use crate::prelude::{AudioFile, AudioFileHandle, AudioFileLoader};
+use crate::AudioPlaybackSet;
 
 use super::{AudioBundle, AudioHandle, AudioSourcePlugin};
 
@@ -24,11 +24,9 @@ pub mod source;
 #[doc(hidden)]
 #[allow(missing_docs)]
 pub mod prelude {
-    pub use super::{
-        AudioFileBundle, AudioFileEndBehavior, AudioFileError, AudioFileSettings,
-    };
     pub use super::loader::*;
     pub use super::source::*;
+    pub use super::{AudioFileBundle, AudioFileEndBehavior, AudioFileError, AudioFileSettings};
 }
 
 /// Specialization of [`AudioBundle`] for the [`AudioFile`] asset.

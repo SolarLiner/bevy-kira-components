@@ -3,8 +3,8 @@ use bevy::utils::error;
 
 use bevy_kira_components::kira::sound::Region;
 use bevy_kira_components::kira::tween::Tween;
-use bevy_kira_components::prelude::*;
 use bevy_kira_components::prelude::AudioBundle;
+use bevy_kira_components::prelude::*;
 use bevy_kira_components::sources::audio_file::AudioFileEndBehavior;
 use diagnostics_ui::DiagnosticsUiPlugin;
 

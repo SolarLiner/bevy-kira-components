@@ -1,22 +1,22 @@
-//! Implementation of [`AudioSource`] for an audio file on disk, loaded either fully in memory, 
+//! Implementation of [`AudioSource`] for an audio file on disk, loaded either fully in memory,
 //! or by streaming the file directly from disk.
 
-use bevy::asset::Asset;
-use bevy::prelude::TypePath;
-use std::sync::Arc;
-use kira::sound::static_sound::{StaticSoundData, StaticSoundHandle, StaticSoundSettings};
-use std::path::PathBuf;
-use kira::sound::streaming::{StreamingSoundData, StreamingSoundHandle, StreamingSoundSettings};
-use kira::manager::error::PlaySoundError;
-use kira::manager::AudioManager;
-use kira::{CommandError, OutputDestination, Volume};
-use std::io::Cursor;
-use bevy::utils::error;
-use kira::sound::{FromFileError, PlaybackRate, PlaybackState, Region};
-use kira::tween::{Tween, Value};
 use crate::backend::AudioBackend;
 use crate::prelude::{AudioFileError, AudioFileSettings, AudioSource};
 use crate::sources::audio_file;
+use bevy::asset::Asset;
+use bevy::prelude::TypePath;
+use bevy::utils::error;
+use kira::manager::error::PlaySoundError;
+use kira::manager::AudioManager;
+use kira::sound::static_sound::{StaticSoundData, StaticSoundHandle, StaticSoundSettings};
+use kira::sound::streaming::{StreamingSoundData, StreamingSoundHandle, StreamingSoundSettings};
+use kira::sound::{FromFileError, PlaybackRate, PlaybackState, Region};
+use kira::tween::{Tween, Value};
+use kira::{CommandError, OutputDestination, Volume};
+use std::io::Cursor;
+use std::path::PathBuf;
+use std::sync::Arc;
 
 /// Bevy [`Asset`] implementation that wraps audio data for [`kira`].
 ///
