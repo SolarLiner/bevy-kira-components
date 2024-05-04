@@ -55,6 +55,8 @@ use bevy::prelude::*;
 use bevy::transform::TransformSystem;
 pub use kira;
 use kira::manager::{AudioManager, AudioManagerSettings};
+use kira::tween::{Tween, Value};
+use kira::Volume;
 
 use crate::backend::AudioBackend;
 use crate::sources::audio_file::AudioFilePlugin;
@@ -133,6 +135,17 @@ impl FromWorld for AudioWorld {
         let audio_manager =
             AudioManager::new(audio_manager_settings).expect("Cannot create audio backend");
         Self { audio_manager }
+    }
+}
+
+impl AudioWorld {
+    /// Set the volume of the main track. This will affect all sounds played through the audio plugin.
+    pub fn set_master_volume(
+        &mut self,
+        volume: impl Into<Value<Volume>>,
+        tween: Tween,
+    ) -> Result<(), kira::CommandError> {
+        self.audio_manager.main_track().set_volume(volume, tween)
     }
 }
 
