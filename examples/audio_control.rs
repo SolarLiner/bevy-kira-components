@@ -64,13 +64,13 @@ fn volume(
     mut music_controller: Query<&mut AudioHandle<AudioFileHandle>, With<MyMusic>>,
     mut target_volume: Local<f64>,
 ) {
-    if let Ok(mut sink) = music_controller.get_single_mut() {
+    if let Ok(mut control) = music_controller.get_single_mut() {
         if keyboard_input.just_pressed(KeyCode::Equal) {
             *target_volume += 0.1;
-            error(sink.set_volume(*target_volume + 1.0, Tween::default()));
+            error(control.set_volume(*target_volume + 1.0, Tween::default()));
         } else if keyboard_input.just_pressed(KeyCode::Minus) {
             *target_volume -= 0.1;
-            error(sink.set_volume(*target_volume + 1.0, Tween::default()));
+            error(control.set_volume(*target_volume + 1.0, Tween::default()));
         }
     }
 }
