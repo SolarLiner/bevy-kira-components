@@ -5,7 +5,6 @@ use bevy::prelude::*;
 use bevy::utils::error;
 use bevy_kira_components::kira::sound::{PlaybackRate, PlaybackState};
 use bevy_kira_components::kira::tween::Tween;
-use bevy_kira_components::prelude::AudioBundle;
 use bevy_kira_components::prelude::*;
 
 fn main() {
@@ -34,9 +33,9 @@ fn update_speed(
     mut music_controller: Query<&mut AudioHandle<AudioFileHandle>, With<MyMusic>>,
     time: Res<Time>,
 ) {
-    if let Ok(mut sink) = music_controller.get_single_mut() {
+    if let Ok(mut control) = music_controller.get_single_mut() {
         let factor = ((time.elapsed_seconds() / 5.0).sin() + 1.0).max(0.1);
-        error(sink.set_playback_rate(PlaybackRate::Factor(factor as f64), Tween::default()));
+        error(control.set_playback_rate(PlaybackRate::Factor(factor as f64), Tween::default()));
     }
 }
 
@@ -45,13 +44,13 @@ fn pause(
     mut music_controller: Query<&mut AudioHandle<AudioFileHandle>, With<MyMusic>>,
 ) {
     if keyboard_input.just_pressed(KeyCode::Space) {
-        if let Ok(mut sink) = music_controller.get_single_mut() {
-            match sink.playback_state() {
+        if let Ok(mut control) = music_controller.get_single_mut() {
+            match control.playback_state() {
                 PlaybackState::Playing => {
-                    error(sink.pause(Tween::default()));
+                    error(control.pause(Tween::default()));
                 }
                 PlaybackState::Pausing | PlaybackState::Paused => {
-                    error(sink.resume(Tween::default()));
+                    error(control.resume(Tween::default()));
                 }
                 PlaybackState::Stopping | PlaybackState::Stopped => {}
             }
