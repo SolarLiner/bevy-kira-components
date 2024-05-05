@@ -10,32 +10,34 @@ pub struct KiraStatisticsDiagnosticPlugin;
 
 impl Plugin for KiraStatisticsDiagnosticPlugin {
     fn build(&self, app: &mut App) {
-        app.register_diagnostic(Diagnostic::new(NUM_COMMANDS).with_suffix(" commands"))
-            .register_diagnostic(Diagnostic::new(NUM_SOUNDS).with_suffix(" sounds"))
-            .register_diagnostic(Diagnostic::new(NUM_CLOCKS).with_suffix(" clocks"))
-            .register_diagnostic(Diagnostic::new(NUM_MODULATORS).with_suffix(" modulators"))
-            .register_diagnostic(Diagnostic::new(NUM_SPATIAL_SCENES).with_suffix(" spatial scenes"))
+        app.register_diagnostic(Diagnostic::new(COMMAND_COUNT).with_suffix(" commands"))
+            .register_diagnostic(Diagnostic::new(SOUND_COUNT).with_suffix(" sounds"))
+            .register_diagnostic(Diagnostic::new(CLOCK_COUNT).with_suffix(" clocks"))
+            .register_diagnostic(Diagnostic::new(MODULATOR_COUNT).with_suffix(" modulators"))
+            .register_diagnostic(
+                Diagnostic::new(SPATIAL_SCENE_COUNT).with_suffix(" spatial scenes"),
+            )
             .add_systems(Last, record_diagnostics);
     }
 }
 
-const NUM_COMMANDS: DiagnosticPath = DiagnosticPath::const_new("kira::manager::num_commands");
-const NUM_SOUNDS: DiagnosticPath = DiagnosticPath::const_new("kira::manager::num_sounds");
-const NUM_CLOCKS: DiagnosticPath = DiagnosticPath::const_new("kira::manager::num_clocks");
-const NUM_MODULATORS: DiagnosticPath = DiagnosticPath::const_new("kira::manager::num_modulators");
-const NUM_SPATIAL_SCENES: DiagnosticPath =
-    DiagnosticPath::const_new("kira::manager::num_spatial_scenes");
+const COMMAND_COUNT: DiagnosticPath = DiagnosticPath::const_new("kira::manager::command_count");
+const SOUND_COUNT: DiagnosticPath = DiagnosticPath::const_new("kira::manager::sound_count");
+const CLOCK_COUNT: DiagnosticPath = DiagnosticPath::const_new("kira::manager::clock_count");
+const MODULATOR_COUNT: DiagnosticPath = DiagnosticPath::const_new("kira::manager::modulator_count");
+const SPATIAL_SCENE_COUNT: DiagnosticPath =
+    DiagnosticPath::const_new("kira::manager::spatial_scene_count");
 
 fn record_diagnostics(audio_world: Res<AudioWorld>, mut diagnostics: Diagnostics) {
-    diagnostics.add_measurement(&NUM_COMMANDS, || {
+    diagnostics.add_measurement(&COMMAND_COUNT, || {
         audio_world.audio_manager.num_modulators() as _
     });
-    diagnostics.add_measurement(&NUM_SOUNDS, || audio_world.audio_manager.num_sounds() as _);
-    diagnostics.add_measurement(&NUM_CLOCKS, || audio_world.audio_manager.num_clocks() as _);
-    diagnostics.add_measurement(&NUM_MODULATORS, || {
+    diagnostics.add_measurement(&SOUND_COUNT, || audio_world.audio_manager.num_sounds() as _);
+    diagnostics.add_measurement(&CLOCK_COUNT, || audio_world.audio_manager.num_clocks() as _);
+    diagnostics.add_measurement(&MODULATOR_COUNT, || {
         audio_world.audio_manager.num_modulators() as _
     });
-    diagnostics.add_measurement(&NUM_SPATIAL_SCENES, || {
+    diagnostics.add_measurement(&SPATIAL_SCENE_COUNT, || {
         audio_world.audio_manager.num_spatial_scenes() as _
     });
 }
