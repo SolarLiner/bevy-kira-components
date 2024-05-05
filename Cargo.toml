@@ -24,6 +24,9 @@ version = "0.13.0"
 default-features = false
 features = ["bevy_asset"]
 
+[dev-dependencies]
+bevy = "0.13"
+
 [features]
 default = []
 diagnostics = []
