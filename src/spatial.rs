@@ -66,7 +66,7 @@ pub struct SpatialEmitter {
 impl Default for SpatialEmitter {
     fn default() -> Self {
         Self {
-            attenuation: None,
+            attenuation: Some(Easing::Linear),
             enable_spatialization: true,
             distances: EmitterDistances::default(),
         }
