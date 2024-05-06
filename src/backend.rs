@@ -1,18 +1,32 @@
+use std::fmt;
+use std::fmt::Formatter;
+
+pub use ::cpal::*;
 use bevy::prelude::*;
-use kira::manager::backend::cpal::CpalBackend;
+use cpal::traits::DeviceTrait;
+use kira::manager::backend::{Backend, Renderer};
+use kira::manager::backend::cpal::{CpalBackend, CpalBackendSettings};
 use kira::manager::backend::mock::{MockBackend, MockBackendSettings};
-use kira::manager::backend::{cpal, Backend, Renderer};
 use thiserror::Error;
 
 /// Allows the user to select an audio backend.
 ///
 /// The default backend uses physical audio devices for output, but there is an alternative "mock" backend that creates
 /// a fake output stream, useful for testing.
-#[derive(Debug, Copy, Clone, Default)]
+#[derive(Clone)]
 pub enum AudioBackendSelector {
     /// Physical audio backend. Sets up the output stream to use actual audio outputs.
-    #[default]
-    Physical,
+    Physical {
+        /// Select a audio device to use to output the audio. `None` lets the system decide which
+        /// audio device to use.
+        device: Option<cpal::Device>,
+        /// Set a specific buffer size for the audio callback coming from the audio device.
+        /// 
+        /// Audio devices do not process audio data sample by sample; they instead process audio 
+        /// data in chunks. This field controls whether you request a specific size for that chunk.
+        /// The audio device is not required to honor that request.
+        buffer_size: cpal::BufferSize,
+    },
     /// Mock audio backend, used to allow the audio engine to run even when no audio outputs are present on the device.
     ///
     /// This is intended for testing purposes, where manually driving the output stream is required.
@@ -22,12 +36,45 @@ pub enum AudioBackendSelector {
     },
 }
 
+impl fmt::Debug for AudioBackendSelector {
+    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
+        match self {
+            AudioBackendSelector::Physical {
+                device,
+                buffer_size,
+            } => f
+                .debug_struct(stringify!(AudioBackendSelector::Physical))
+                .field(
+                    "device",
+                    &device
+                        .as_ref()
+                        .map(|device| device.name().unwrap_or("Unknown device name".to_string())),
+                )
+                .field("buffer_size", buffer_size)
+                .finish(),
+            AudioBackendSelector::Mock { sample_rate } => f
+                .debug_struct(stringify!(AudioBackendSelector::Mock))
+                .field("sample_rate", sample_rate)
+                .finish(),
+        }
+    }
+}
+
+impl Default for AudioBackendSelector {
+    fn default() -> Self {
+        Self::Physical {
+            device: None,
+            buffer_size: cpal::BufferSize::Default,
+        }
+    }
+}
+
 /// Enum of possible errors when creating the audio backend.
 #[derive(Debug, Error)]
 pub enum AudioBackendError {
     /// Error comes from the audio driver
     #[error("Audio driver error: {0}")]
-    AudioDriverError(#[from] cpal::Error),
+    AudioDriverError(#[from] kira::manager::backend::cpal::Error),
 }
 
 /// Audio backend enum.
@@ -44,8 +91,14 @@ impl Backend for AudioBackend {
 
     fn setup(settings: Self::Settings) -> Result<(Self, u32), Self::Error> {
         match settings {
-            AudioBackendSelector::Physical => {
-                let (backend, sample_rate) = CpalBackend::setup(default())?;
+            AudioBackendSelector::Physical {
+                device,
+                buffer_size,
+            } => {
+                let (backend, sample_rate) = CpalBackend::setup(CpalBackendSettings {
+                    device,
+                    buffer_size,
+                })?;
                 Ok((Self::Physical(backend), sample_rate))
             }
             AudioBackendSelector::Mock { sample_rate } => {
