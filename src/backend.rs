@@ -45,7 +45,7 @@ impl Backend for AudioBackend {
     fn setup(settings: Self::Settings) -> Result<(Self, u32), Self::Error> {
         match settings {
             AudioBackendSelector::Physical => {
-                let (backend, sample_rate) = CpalBackend::setup(())?;
+                let (backend, sample_rate) = CpalBackend::setup(default())?;
                 Ok((Self::Physical(backend), sample_rate))
             }
             AudioBackendSelector::Mock { sample_rate } => {

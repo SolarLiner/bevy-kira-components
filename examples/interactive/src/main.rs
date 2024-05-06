@@ -68,12 +68,12 @@ fn handle_interactive_sound(
     }
     if keyboard.just_pressed(KeyCode::Space) {
         for (mut handle, mut sprite) in &mut q {
-            error(handle.resume(Tween::default()));
+            handle.resume(Tween::default());
             sprite.color = Color::GREEN;
         }
     } else if keyboard.just_released(KeyCode::Space) {
         for (mut handle, mut sprite) in &mut q {
-            error(handle.pause(Tween::default()));
+            handle.pause(Tween::default());
             sprite.color = Color::GRAY;
         }
     }

@@ -271,12 +271,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "fbb36e985947064623dbd357f727af08ffd077f93d696782f3c56365fa2e2799"
 
 [[package]]
-name = "atomic-arena"
-version = "0.1.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5450eca8ce5abcfd5520727e975ebab30ccca96030550406b0ca718b224ead10"
-
-[[package]]
 name = "atomic-waker"
 version = "1.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -309,7 +303,9 @@ name = "bevy-kira-components"
 version = "0.1.1"
 dependencies = [
  "bevy",
+ "bevy_math",
  "kira",
+ "mint",
  "serde",
  "thiserror",
 ]
@@ -720,11 +716,11 @@ dependencies = [
 
 [[package]]
 name = "bevy_math"
-version = "0.13.0"
+version = "0.13.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6f312b1b8aa6d3965b65040b08e33efac030db3071f20b44f9da9c4c3dfcaf76"
+checksum = "f06daa26ffb82d90ba772256c0ba286f6c305c392f6976c9822717974805837c"
 dependencies = [
- "glam",
+ "glam 0.25.0",
  "serde",
 ]
 
@@ -734,7 +730,7 @@ version = "0.13.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3075c01f2b1799945892d5310fc1836e47c045dfe6af5878a304a475931a0c5f"
 dependencies = [
- "glam",
+ "glam 0.25.0",
 ]
 
 [[package]]
@@ -780,7 +776,7 @@ dependencies = [
  "bevy_utils",
  "downcast-rs",
  "erased-serde",
- "glam",
+ "glam 0.25.0",
  "serde",
  "smol_str",
  "thiserror",
@@ -1598,7 +1594,7 @@ checksum = "95ed933078d2e659745df651f4c180511cd582e5b9414ff896e7d50d207e3103"
 dependencies = [
  "const_panic",
  "encase_derive",
- "glam",
+ "glam 0.25.0",
  "thiserror",
 ]
 
@@ -1892,7 +1888,7 @@ dependencies = [
  "vec_map",
  "wasm-bindgen",
  "web-sys",
- "windows 0.48.0",
+ "windows 0.54.0",
 ]
 
 [[package]]
@@ -1915,6 +1911,15 @@ dependencies = [
  "bytemuck",
  "mint",
  "serde",
+]
+
+[[package]]
+name = "glam"
+version = "0.27.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9e05e7e6723e3455f4818c7b26e855439f7546cf617ef669d1adedb8669e5cb9"
+dependencies = [
+ "mint",
 ]
 
 [[package]]
@@ -2092,7 +2097,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f33ddb7f7143d9e703c072e88b98cd8b9719f174137a671429351bd2ee43c02a"
 dependencies = [
  "constgebra",
- "glam",
+ "glam 0.25.0",
 ]
 
 [[package]]
@@ -2265,18 +2270,18 @@ checksum = "e2db585e1d738fc771bf08a151420d3ed193d9d895a36df7f6f8a9456b911ddc"
 
 [[package]]
 name = "kira"
-version = "0.8.7"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8968f1eda49cdf4f6406fd5ffe590c3ca2778a1b0e50b5684974b138a99dfb2f"
+version = "0.8.6"
+source = "git+https://github.com/tesselode/kira.git?branch=main#3ec7efe5408b6658645b1777ff7be37af5f32eb6"
 dependencies = [
- "atomic-arena",
  "cpal",
- "glam",
+ "glam 0.27.0",
  "mint",
+ "paste",
  "ringbuf",
  "send_wrapper",
  "serde",
  "symphonia",
+ "triple_buffer",
 ]
 
 [[package]]
@@ -3637,6 +3642,15 @@ dependencies = [
  "tracing",
  "tracing-subscriber",
  "wasm-bindgen",
+]
+
+[[package]]
+name = "triple_buffer"
+version = "7.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "316e1ab00252ce5980b8a70eb50f9818f47a20d341394c56ffab88e764b3caed"
+dependencies = [
+ "crossbeam-utils",
 ]
 
 [[package]]

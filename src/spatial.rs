@@ -146,20 +146,15 @@ fn add_emitters(
 fn update_listeners(mut q: Query<(&mut SpatialListenerHandle, &GlobalTransform)>) {
     for (mut listener, global_transform) in &mut q {
         let (_, quat, position) = global_transform.to_scale_rotation_translation();
-        listener.0.set_position(position, Tween::default()).unwrap();
-        listener.0.set_orientation(quat, Tween::default()).unwrap();
+        listener.0.set_position(position, Tween::default());
+        listener.0.set_orientation(quat, Tween::default());
     }
 }
 
 fn update_emitters(mut q: Query<(Entity, &mut SpatialEmitterHandle, &GlobalTransform)>) {
     for (entity, mut emitter, global_transform) in &mut q {
         let position = global_transform.translation();
-        match emitter.0.set_position(position, Tween::default()) {
-            Ok(_) => {}
-            Err(err) => {
-                error!("Cannot set spatial audio position for entity {entity:?}: {err}");
-            }
-        }
+        emitter.0.set_position(position, Tween::default());
     }
 }
 

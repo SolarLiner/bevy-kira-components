@@ -133,17 +133,14 @@ impl Default for AudioFileSettings {
 
 fn play_sound_error_transmute<Out>(err: PlaySoundError<()>) -> PlaySoundError<Out> {
     match err {
-        PlaySoundError::CommandError(cmd) => PlaySoundError::CommandError(cmd),
         PlaySoundError::SoundLimitReached => PlaySoundError::SoundLimitReached,
-        _ => unreachable!(),
+        _ => unreachable!("Cannot magically go from () to {}", std::any::type_name::<Out>()),
     }
 }
 
 fn play_sound_error_cast<In, Out: From<In>>(err: PlaySoundError<In>) -> PlaySoundError<Out> {
     match err {
-        PlaySoundError::CommandError(cmd) => PlaySoundError::CommandError(cmd),
         PlaySoundError::SoundLimitReached => PlaySoundError::SoundLimitReached,
         PlaySoundError::IntoSoundError(input) => PlaySoundError::IntoSoundError(input.into()),
-        _ => unreachable!(),
     }
 }

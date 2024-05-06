@@ -127,13 +127,12 @@ impl<T: AudioSource> AudioSourcePlugin<T> {
             Without<AudioHandle<T::Handle>>,
         >,
     ) {
-        let main_track_handle = audio_world.audio_manager.main_track();
         for (entity, source, settings, spatial_emitter, output_destination) in &q_added {
             let output_destination = if let Some(emitter) = spatial_emitter {
                 kira::OutputDestination::Emitter(emitter.0.id())
             } else {
                 let output_handle = match output_destination {
-                    OutputDestination::MainOutput => &main_track_handle,
+                    OutputDestination::MainOutput => &*audio_world.audio_manager.main_track(),
                 };
                 kira::OutputDestination::Track(output_handle.id())
             };
