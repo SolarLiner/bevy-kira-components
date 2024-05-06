@@ -1,26 +1,33 @@
-use std::{convert::Infallible, f32::consts::TAU};
+use std::convert::Infallible;
+use std::f32::consts::TAU;
 
 use bevy::prelude::*;
-use bevy_kira_components::sources::AudioSource;
-use bevy_kira_components::{
-    kira::{
-        self,
-        manager::error::PlaySoundError,
-        sound::{Sound, SoundData},
-        tween::{Parameter, Tween, Value},
-    },
-    prelude::*,
-    sources::AudioSourcePlugin,
-};
+use kira::manager::error::PlaySoundError;
+use kira::sound::{Sound, SoundData};
+use kira::tween::{Parameter, Tween, Value};
 use ringbuf::{HeapConsumer, HeapProducer, HeapRb};
 
-pub struct SineWavePlugin;
+use bevy_kira_components::prelude::*;
 
-impl Plugin for SineWavePlugin {
-    fn build(&self, app: &mut App) {
-        app.add_plugins(AudioSourcePlugin::<SineWave>::default());
-    }
+fn main() {
+    App::new()
+        .add_plugins((
+            DefaultPlugins,
+            AudioPlugin,
+            AudioSourcePlugin::<SineWave>::default(),
+        ))
+        .add_systems(Startup, setup)
+        .run();
 }
+
+fn setup(mut commands: Commands, mut assets: ResMut<Assets<SineWave>>) {
+    use bevy_kira_components::sources::AudioBundle;
+    let handle = assets.add(SineWave);
+    commands.spawn(AudioBundle {
+        source: handle,
+        settings: SineWaveSettings { frequency: 440.0 },
+        ..default()
+    });
 
 /// Enum for commands the Handle (controlled within Bevy systems) can send to the sound (in the
 /// audio thread).
@@ -35,7 +42,7 @@ impl Plugin for SineWavePlugin {
 /// audio thread nor the sending thread has to wait on each other.
 enum SineWaveCommand {
     /// Set the frequency to a new value. It will use the provided `Tween` to transition from the
-    /// old value to this one.
+    /// old value to t:his one.
     SetFrequency(Value<f32>, Tween),
 }
 
@@ -64,7 +71,7 @@ impl Sound for SineWaveSound {
         dt: f64,
         clock_info_provider: &kira::clock::clock_info::ClockInfoProvider,
         modulator_value_provider: &kira::modulator::value_provider::ModulatorValueProvider,
-    ) -> kira::Frame {
+    ) -> kira::dsp::Frame {
         // Receive and perform commands
         while let Some(command) = self.commands.pop() {
             match command {
@@ -80,11 +87,11 @@ impl Sound for SineWaveSound {
         if self.phase > 1. {
             self.phase -= 1.;
         }
-        // 24 dB reduction to not blast the user's speakers (and ears)
+        // 24 dB = 8x reduction to not blast the user's speakers (and ears)
         let sample = 0.125 * f32::sin(TAU * self.phase);
 
         // Return the new stereo sample
-        kira::Frame {
+        kira::dsp::Frame {
             left: sample,
             right: sample,
         }
@@ -119,7 +126,7 @@ pub struct SineWaveHandle {
 impl SineWaveHandle {
     pub fn set_frequency(&mut self, frequency: impl Into<Value<f32>>, tween: Tween) {
         if self.commands.is_full() {
-            error!("Cannot send command: command queue is full");
+            error!("maximum number of in-flight commands reached, cannot add any more");
             return;
         }
         assert!(self
