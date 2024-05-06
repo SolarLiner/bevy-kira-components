@@ -6,6 +6,7 @@ use crate::prelude::{AudioFileError, AudioFileSettings, AudioSource};
 use crate::sources::audio_file;
 use bevy::asset::Asset;
 use bevy::prelude::*;
+use bevy::utils::error;
 use kira::manager::error::PlaySoundError;
 use kira::manager::AudioManager;
 use kira::sound::static_sound::{StaticSoundData, StaticSoundHandle, StaticSoundSettings};
@@ -16,7 +17,6 @@ use kira::{CommandError, OutputDestination, Volume};
 use std::io::Cursor;
 use std::path::PathBuf;
 use std::sync::Arc;
-use bevy::utils::error;
 
 /// Bevy [`Asset`] implementation that wraps audio data for [`kira`].
 ///
@@ -152,11 +152,11 @@ impl AudioFileHandle {
 
 impl AudioFileHandle {
     /// Convenience method to toggling the playback state of an audio file.
-    /// 
-    /// This is a simple wrapper around [`Self::pause`] and [`Self::resume`], which are called 
+    ///
+    /// This is a simple wrapper around [`Self::pause`] and [`Self::resume`], which are called
     /// depending on the current playback state.
-    /// 
-    /// Note that Kira has a special "stopped" state, which means the file has completely 
+    ///
+    /// Note that Kira has a special "stopped" state, which means the file has completely
     /// finished playing, and cannot be resumed (an error will be logged if that's the case).
     pub fn toggle(&mut self, tween: Tween) -> Result<(), CommandError> {
         match self.playback_state() {
