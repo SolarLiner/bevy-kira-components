@@ -64,6 +64,7 @@ mod backend;
 pub mod diagnostics;
 pub mod sources;
 pub mod spatial;
+pub mod clock;
 
 #[doc(hidden)]
 #[allow(missing_docs)]
