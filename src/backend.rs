@@ -1,13 +1,14 @@
 use std::fmt;
 use std::fmt::Formatter;
 
-pub use ::cpal::*;
 use bevy::prelude::*;
 use cpal::traits::DeviceTrait;
 use kira::manager::backend::cpal::{CpalBackend, CpalBackendSettings};
 use kira::manager::backend::mock::{MockBackend, MockBackendSettings};
 use kira::manager::backend::{Backend, Renderer};
 use thiserror::Error;
+
+pub use cpal::*;
 
 /// Allows the user to select an audio backend.
 ///
@@ -17,7 +18,7 @@ use thiserror::Error;
 pub enum AudioBackendSelector {
     /// Physical audio backend. Sets up the output stream to use actual audio outputs.
     Physical {
-        /// Select a audio device to use to output the audio. `None` lets the system decide which
+        /// Select an audio device to use to output the audio. `None` lets the system decide which
         /// audio device to use.
         device: Option<cpal::Device>,
         /// Set a specific buffer size for the audio callback coming from the audio device.
