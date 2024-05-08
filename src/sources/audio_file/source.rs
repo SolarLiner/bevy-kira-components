@@ -5,7 +5,7 @@ use crate::backend::AudioBackend;
 use crate::prelude::{AudioFileError, AudioFileSettings, AudioSource};
 use crate::sources::audio_file;
 use bevy::asset::Asset;
-use bevy::prelude::TypePath;
+use bevy::prelude::*;
 use bevy::utils::error;
 use kira::manager::error::PlaySoundError;
 use kira::manager::AudioManager;
@@ -148,6 +148,26 @@ impl AudioFileHandle {
     defer_call!(fn stop(&mut self, tween: Tween) -> Result<(), CommandError>);
     defer_call!(fn seek_to(&mut self, position: f64) -> Result<(), CommandError>);
     defer_call!(fn seek_by(&mut self, amount: f64) -> Result<(), CommandError>);
+}
+
+impl AudioFileHandle {
+    /// Convenience method to toggling the playback state of an audio file.
+    ///
+    /// This is a simple wrapper around [`Self::pause`] and [`Self::resume`], which are called
+    /// depending on the current playback state.
+    ///
+    /// Note that Kira has a special "stopped" state, which means the file has completely
+    /// finished playing, and cannot be resumed (an error will be logged if that's the case).
+    pub fn toggle(&mut self, tween: Tween) -> Result<(), CommandError> {
+        match self.playback_state() {
+            PlaybackState::Playing => self.pause(tween),
+            PlaybackState::Pausing | PlaybackState::Paused => self.resume(tween),
+            PlaybackState::Stopping | PlaybackState::Stopped => {
+                error!("Audio file has stopped and cannot be resumed again");
+                Ok(())
+            }
+        }
+    }
 }
 
 /// Enum of the possible sound handles that [`kira`] returns
