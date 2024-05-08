@@ -7,7 +7,6 @@ use std::sync::Arc;
 
 use bevy::asset::Asset;
 use bevy::prelude::*;
-use bevy::utils::error;
 use kira::manager::error::PlaySoundError;
 use kira::manager::AudioManager;
 use kira::sound::static_sound::{StaticSoundData, StaticSoundHandle, StaticSoundSettings};
@@ -162,13 +161,12 @@ impl AudioFileHandle {
     ///
     /// Note that Kira has a special "stopped" state, which means the file has completely
     /// finished playing, and cannot be resumed (an error will be logged if that's the case).
-    pub fn toggle(&mut self, tween: Tween) -> Result<(), CommandError> {
+    pub fn toggle(&mut self, tween: Tween) {
         match self.playback_state() {
             PlaybackState::Playing => self.pause(tween),
             PlaybackState::Pausing | PlaybackState::Paused => self.resume(tween),
             PlaybackState::Stopping | PlaybackState::Stopped => {
                 error!("Audio file has stopped and cannot be resumed again");
-                Ok(())
             }
         }
     }

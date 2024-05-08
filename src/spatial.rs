@@ -151,8 +151,8 @@ fn update_listeners(mut q: Query<(&mut SpatialListenerHandle, &GlobalTransform)>
     }
 }
 
-fn update_emitters(mut q: Query<(Entity, &mut SpatialEmitterHandle, &GlobalTransform)>) {
-    for (entity, mut emitter, global_transform) in &mut q {
+fn update_emitters(mut q: Query<(&mut SpatialEmitterHandle, &GlobalTransform)>) {
+    for (mut emitter, global_transform) in &mut q {
         let position = global_transform.translation();
         emitter.0.set_position(position, Tween::default());
     }

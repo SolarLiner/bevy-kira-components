@@ -4,9 +4,9 @@ use std::fmt::Formatter;
 pub use ::cpal::*;
 use bevy::prelude::*;
 use cpal::traits::DeviceTrait;
-use kira::manager::backend::{Backend, Renderer};
 use kira::manager::backend::cpal::{CpalBackend, CpalBackendSettings};
 use kira::manager::backend::mock::{MockBackend, MockBackendSettings};
+use kira::manager::backend::{Backend, Renderer};
 use thiserror::Error;
 
 /// Allows the user to select an audio backend.
@@ -21,8 +21,8 @@ pub enum AudioBackendSelector {
         /// audio device to use.
         device: Option<cpal::Device>,
         /// Set a specific buffer size for the audio callback coming from the audio device.
-        /// 
-        /// Audio devices do not process audio data sample by sample; they instead process audio 
+        ///
+        /// Audio devices do not process audio data sample by sample; they instead process audio
         /// data in chunks. This field controls whether you request a specific size for that chunk.
         /// The audio device is not required to honor that request.
         buffer_size: cpal::BufferSize,

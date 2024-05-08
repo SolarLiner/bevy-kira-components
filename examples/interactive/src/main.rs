@@ -1,5 +1,4 @@
 use bevy::prelude::*;
-use bevy::utils::error;
 
 use bevy_kira_components::kira::sound::Region;
 use bevy_kira_components::kira::tween::Tween;
