@@ -1,6 +1,5 @@
 use bevy::math::vec3;
 use bevy::prelude::*;
-use bevy::utils::error;
 
 use bevy_kira_components::kira::sound::{PlaybackRate, Region};
 use bevy_kira_components::kira::tween::Tween;
@@ -153,6 +152,6 @@ fn fake_doppler_effect(
         let local_dir = Vec3::normalize(cam_transform.translation - transform.translation());
         doppler.0 = (SPEED_OF_SOUND - cam_motion.motion().dot(local_dir))
             / (SPEED_OF_SOUND - motion.motion().dot(local_dir));
-        error(handle.set_playback_rate(PlaybackRate::Factor(doppler.0 as _), Tween::default()));
+        handle.set_playback_rate(PlaybackRate::Factor(doppler.0 as _), Tween::default());
     }
 }

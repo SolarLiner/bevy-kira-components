@@ -2,7 +2,7 @@
 //! For loading additional audio formats, you can enable the corresponding feature for that audio format.
 
 use bevy::prelude::*;
-use bevy::utils::error;
+
 use bevy_kira_components::kira::sound::{PlaybackRate, PlaybackState};
 use bevy_kira_components::kira::tween::Tween;
 use bevy_kira_components::prelude::*;
@@ -35,7 +35,7 @@ fn update_speed(
 ) {
     if let Ok(mut control) = music_controller.get_single_mut() {
         let factor = ((time.elapsed_seconds() / 5.0).sin() + 1.0).max(0.1);
-        error(control.set_playback_rate(PlaybackRate::Factor(factor as f64), Tween::default()));
+        control.set_playback_rate(PlaybackRate::Factor(factor as f64), Tween::default());
     }
 }
 
@@ -47,10 +47,10 @@ fn pause(
         if let Ok(mut control) = music_controller.get_single_mut() {
             match control.playback_state() {
                 PlaybackState::Playing => {
-                    error(control.pause(Tween::default()));
+                    control.pause(Tween::default());
                 }
                 PlaybackState::Pausing | PlaybackState::Paused => {
-                    error(control.resume(Tween::default()));
+                    control.resume(Tween::default());
                 }
                 PlaybackState::Stopping | PlaybackState::Stopped => {}
             }
@@ -66,10 +66,10 @@ fn volume(
     if let Ok(mut control) = music_controller.get_single_mut() {
         if keyboard_input.just_pressed(KeyCode::Equal) {
             *target_volume += 0.1;
-            error(control.set_volume(*target_volume + 1.0, Tween::default()));
+            control.set_volume(*target_volume + 1.0, Tween::default());
         } else if keyboard_input.just_pressed(KeyCode::Minus) {
             *target_volume -= 0.1;
-            error(control.set_volume(*target_volume + 1.0, Tween::default()));
+            control.set_volume(*target_volume + 1.0, Tween::default());
         }
     }
 }

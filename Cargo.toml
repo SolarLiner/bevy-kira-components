@@ -15,7 +15,9 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-kira = { version = "0.8.7", features = ["serde"] }
+bevy_math = { version = "0.13.2", features = ["mint"] }
+cpal = "0.15.3"
+kira = { version = "0.8.6", git = "https://github.com/tesselode/kira.git", branch = "main", features = ["serde"] }
 thiserror = "1.0.57"
 serde = { version = "1.0.197", features = ["derive"] }
 

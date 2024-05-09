@@ -17,7 +17,7 @@ use ringbuf::{HeapConsumer, HeapProducer, HeapRb};
 pub struct SineWavePlugin;
 
 impl Plugin for SineWavePlugin {
-    fn build(&self, app: &mut bevy::prelude::App) {
+    fn build(&self, app: &mut App) {
         app.add_plugins(AudioSourcePlugin::<SineWave>::default());
     }
 }
@@ -39,14 +39,14 @@ enum SineWaveCommand {
     SetFrequency(Value<f32>, Tween),
 }
 
-/// Implementation of [`kira::sound::Sound`] that generates a sine wave at the given frequency.
+/// Implementation of [`Sound`] that generates a sine wave at the given frequency.
 struct SineWaveSound {
     /// Output destination. This tells kira where to route the audio data that the output of our
     /// `Sound` implementation
     output: kira::OutputDestination,
     /// Commands receiver (aka. a consumer) of commands sent from other threads
     commands: HeapConsumer<SineWaveCommand>,
-    /// Sine wave frequency (in Hz). Reuses `kira`'s [`kira::tween::Parameter`] struct to provide
+    /// Sine wave frequency (in Hz). Reuses `kira`'s [`Parameter`] struct to provide
     /// click-free changes and ability to provide modulations.
     frequency: Parameter<f32>,
     /// Internal phase of the sine wave. We keep track of the phase instead of the time, as this
@@ -55,16 +55,16 @@ struct SineWaveSound {
 }
 
 impl Sound for SineWaveSound {
-    fn output_destination(&mut self) -> bevy_kira_components::kira::OutputDestination {
+    fn output_destination(&mut self) -> kira::OutputDestination {
         self.output
     }
 
     fn process(
         &mut self,
         dt: f64,
-        clock_info_provider: &bevy_kira_components::kira::clock::clock_info::ClockInfoProvider,
-        modulator_value_provider: &bevy_kira_components::kira::modulator::value_provider::ModulatorValueProvider,
-    ) -> bevy_kira_components::kira::dsp::Frame {
+        clock_info_provider: &kira::clock::clock_info::ClockInfoProvider,
+        modulator_value_provider: &kira::modulator::value_provider::ModulatorValueProvider,
+    ) -> kira::Frame {
         // Receive and perform commands
         while let Some(command) = self.commands.pop() {
             match command {
@@ -84,7 +84,7 @@ impl Sound for SineWaveSound {
         let sample = 0.125 * f32::sin(TAU * self.phase);
 
         // Return the new stereo sample
-        kira::dsp::Frame {
+        kira::Frame {
             left: sample,
             right: sample,
         }

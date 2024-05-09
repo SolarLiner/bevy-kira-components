@@ -1,22 +1,23 @@
 //! Implementation of [`AudioSource`] for an audio file on disk, loaded either fully in memory,
 //! or by streaming the file directly from disk.
 
-use crate::backend::AudioBackend;
-use crate::prelude::{AudioFileError, AudioFileSettings, AudioSource};
-use crate::sources::audio_file;
+use std::io::Cursor;
+use std::path::PathBuf;
+use std::sync::Arc;
+
 use bevy::asset::Asset;
 use bevy::prelude::*;
-use bevy::utils::error;
 use kira::manager::error::PlaySoundError;
 use kira::manager::AudioManager;
 use kira::sound::static_sound::{StaticSoundData, StaticSoundHandle, StaticSoundSettings};
 use kira::sound::streaming::{StreamingSoundData, StreamingSoundHandle, StreamingSoundSettings};
 use kira::sound::{FromFileError, PlaybackRate, PlaybackState, Region};
 use kira::tween::{Tween, Value};
-use kira::{CommandError, OutputDestination, Volume};
-use std::io::Cursor;
-use std::path::PathBuf;
-use std::sync::Arc;
+use kira::{OutputDestination, StartTime, Volume};
+
+use crate::backend::AudioBackend;
+use crate::prelude::{AudioFileError, AudioFileSettings, AudioSource};
+use crate::sources::audio_file;
 
 /// Bevy [`Asset`] implementation that wraps audio data for [`kira`].
 ///
@@ -43,29 +44,30 @@ impl AudioSource for AudioFile {
     fn create_handle(
         &self,
         manager: &mut AudioManager<AudioBackend>,
-        settings: &Self::Settings,
+        asset_settings: &Self::Settings,
         output_destination: OutputDestination,
     ) -> Result<Self::Handle, Self::Error> {
-        let start_paused = settings.start_paused;
+        let start_paused = asset_settings.start_paused;
         match self {
             Self::Static(data, kira_settings) => {
                 let settings = (*kira_settings)
                     .output_destination(output_destination)
-                    .volume(settings.volume)
-                    .panning(settings.panning)
-                    .loop_region(settings.loop_region)
-                    .reverse(settings.reverse)
-                    .playback_region(settings.play_region);
-                let static_data = StaticSoundData::from_cursor(Cursor::new(data.clone()), settings)
+                    .volume(asset_settings.volume)
+                    .panning(asset_settings.panning)
+                    .loop_region(asset_settings.loop_region)
+                    .reverse(asset_settings.reverse)
+                    .start_position(asset_settings.play_region.start);
+                let static_data = StaticSoundData::from_cursor(Cursor::new(data.clone()))
                     .map_err(|err| {
                         PlaySoundError::IntoSoundError(AudioFileError::FromFileError(err))
-                    })?;
+                    })?
+                    .with_settings(settings);
                 manager
-                    .play(static_data)
+                    .play(static_data.slice(asset_settings.play_region))
                     .map_err(audio_file::play_sound_error_transmute)
                     .map(|mut handle| {
                         if start_paused {
-                            error(handle.pause(Tween::default()));
+                            handle.pause(Tween::default());
                         }
                         handle
                     })
@@ -78,20 +80,20 @@ impl AudioSource for AudioFile {
             } => {
                 let settings = (*kira_settings)
                     .output_destination(output_destination)
-                    .volume(settings.volume)
-                    .panning(settings.panning)
-                    .loop_region(settings.loop_region)
-                    .playback_region(settings.play_region);
-                let streaming_sound_data =
-                    StreamingSoundData::from_file(path, settings).map_err(|err| {
+                    .volume(asset_settings.volume)
+                    .panning(asset_settings.panning)
+                    .loop_region(asset_settings.loop_region);
+                let streaming_sound_data = StreamingSoundData::from_file(path)
+                    .map_err(|err| {
                         PlaySoundError::IntoSoundError(AudioFileError::FromFileError(err))
-                    })?;
+                    })?
+                    .with_settings(settings);
                 manager
-                    .play(streaming_sound_data)
+                    .play(streaming_sound_data.slice(asset_settings.play_region))
                     .map_err(audio_file::play_sound_error_cast)
                     .map(|mut handle| {
                         if start_paused {
-                            error(handle.pause(Tween::default()));
+                            handle.pause(Tween::default());
                         }
                         handle
                     })
@@ -107,26 +109,26 @@ impl AudioSource for AudioFile {
 pub struct AudioFileHandle(RawAudioHandleImpl);
 
 macro_rules! defer_call {
-    (fn $name:ident(&self $(, $argname:ident: $argtype:ty)*) -> $ret:ty) => {
-        defer_call!(fn $name :: $name(&self $(, $argname: $argtype)*) -> $ret);
+    (fn $name:ident(&self $(, $argname:ident: $argtype:ty)*)$( -> $ret:ty)?) => {
+        defer_call!(fn $name :: $name(&self $(, $argname: $argtype)*)$( -> $ret)?);
     };
     // Don't know how to parametrize the `mut` and be able to factor these two into one variant
-    (fn $name:ident :: $fnname:ident(&self $(, $argname:ident: $argtype:ty)*) -> $ret:ty) => {
+    (fn $name:ident :: $fnname:ident(&self $(, $argname:ident: $argtype:ty)*)$( -> $ret:ty)?) => {
        /// Forwarded call to [`StaticSoundHandle`] or [`StreamingSoundHandle`].
        ///
        /// Note: Documentation cannot be provided directly due to limitations with docs in macros.
-       pub fn $fnname(&self, $($argname: $argtype),*) -> $ret {
+       pub fn $fnname(&self, $($argname: $argtype),*)$( -> $ret)? {
             match self {
                 Self(RawAudioHandleImpl::Static(handle)) => handle.$name($($argname),*),
                 Self(RawAudioHandleImpl::Streaming(handle)) => handle.$name($($argname),*),
             }
         }
     };
-    (fn $name:ident(&mut self $(, $argname:ident: $argtype:ty)*) -> $ret:ty) => {
+    (fn $name:ident(&mut self $(, $argname:ident: $argtype:ty)*)$( -> $ret:ty)?) => {
        /// Forwarded call to [`StaticSoundHandle`] or [`StreamingSoundHandle`].
        ///
        /// Note: Documentation cannot be provided directly due to limitations with docs in macros.
-        pub fn $name(&mut self, $($argname: $argtype),*) -> $ret {
+        pub fn $name(&mut self, $($argname: $argtype),*)$( -> $ret)? {
             match self {
                 Self(RawAudioHandleImpl::Static(handle)) => handle.$name($($argname),*),
                 Self(RawAudioHandleImpl::Streaming(handle)) => handle.$name($($argname),*),
@@ -138,16 +140,17 @@ macro_rules! defer_call {
 impl AudioFileHandle {
     defer_call!(fn state :: playback_state(&self) -> PlaybackState);
     defer_call!(fn position(&self) -> f64);
-    defer_call!(fn set_playback_rate(&mut self, rate: impl Into<Value<PlaybackRate>>, tween: Tween) -> Result<(), CommandError>);
-    defer_call!(fn set_panning(&mut self, panning: impl Into<Value<f64>>, tween: Tween) -> Result<(), CommandError>);
-    defer_call!(fn set_playback_region(&mut self, region: impl Into<Region>) -> Result<(), CommandError>);
-    defer_call!(fn set_loop_region(&mut self, region: impl Into<Region>) -> Result<(), CommandError>);
-    defer_call!(fn set_volume(&mut self, volume: impl Into<Value<Volume>>, tween: Tween) -> Result<(), CommandError>);
-    defer_call!(fn pause(&mut self, tween: Tween) -> Result<(), CommandError>);
-    defer_call!(fn resume(&mut self, tween: Tween) -> Result<(), CommandError>);
-    defer_call!(fn stop(&mut self, tween: Tween) -> Result<(), CommandError>);
-    defer_call!(fn seek_to(&mut self, position: f64) -> Result<(), CommandError>);
-    defer_call!(fn seek_by(&mut self, amount: f64) -> Result<(), CommandError>);
+    defer_call!(fn set_playback_rate(&mut self, rate: impl Into<Value<PlaybackRate>>, tween: Tween));
+    defer_call!(fn set_panning(&mut self, panning: impl Into<Value<f64>>, tween: Tween));
+    //defer_call!(fn set_playback_region(&mut self, region: impl Into<Region>));
+    defer_call!(fn set_loop_region(&mut self, region: impl Into<Region>));
+    defer_call!(fn set_volume(&mut self, volume: impl Into<Value<Volume>>, tween: Tween));
+    defer_call!(fn pause(&mut self, tween: Tween));
+    defer_call!(fn resume(&mut self, tween: Tween));
+    defer_call!(fn resume_at(&mut self, start_time: StartTime, tween: Tween));
+    defer_call!(fn stop(&mut self, tween: Tween));
+    defer_call!(fn seek_to(&mut self, position: f64));
+    defer_call!(fn seek_by(&mut self, amount: f64));
 }
 
 impl AudioFileHandle {
@@ -158,13 +161,12 @@ impl AudioFileHandle {
     ///
     /// Note that Kira has a special "stopped" state, which means the file has completely
     /// finished playing, and cannot be resumed (an error will be logged if that's the case).
-    pub fn toggle(&mut self, tween: Tween) -> Result<(), CommandError> {
+    pub fn toggle(&mut self, tween: Tween) {
         match self.playback_state() {
             PlaybackState::Playing => self.pause(tween),
             PlaybackState::Pausing | PlaybackState::Paused => self.resume(tween),
             PlaybackState::Stopping | PlaybackState::Stopped => {
                 error!("Audio file has stopped and cannot be resumed again");
-                Ok(())
             }
         }
     }
