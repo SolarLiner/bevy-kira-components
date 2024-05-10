@@ -55,6 +55,7 @@ use bevy::prelude::*;
 use bevy::transform::TransformSystem;
 pub use kira;
 use kira::manager::{AudioManager, AudioManagerSettings};
+use kira::track::TrackBuilder;
 
 use crate::backend::AudioBackend;
 use crate::sources::audio_file::AudioFilePlugin;
@@ -68,10 +69,11 @@ pub mod spatial;
 #[doc(hidden)]
 #[allow(missing_docs)]
 pub mod prelude {
-    pub use super::{AudioPlaybackSet, AudioPlugin, AudioSettings, AudioWorld};
+    pub use super::{AudioPlaybackSet, AudioPlugin, AudioSettings, AudioWorld, EffectRack};
     pub use crate::backend::*;
     pub use crate::sources::prelude::*;
     pub use crate::spatial::prelude::*;
+    pub use bevy_kira_components_derive::EffectRack;
 }
 
 /// Type of settings for the audio engine. Insert it as a resource before adding the plugin to
@@ -141,3 +143,14 @@ impl FromWorld for AudioWorld {
 /// Internal marker for entities with audio components. Needed to be able to query in a
 /// non-generic way for having added audio support through the [`AudioBundle`] struct.
 pub struct InternalAudioMarker;
+
+// todo: Consider a better place for this
+#[derive(Component)]
+pub struct TrackBuilderWrapped(pub TrackBuilder);
+
+// todo: Consider a better place for this
+pub trait EffectRack {
+    type Controller;
+
+    fn apply(self, track_builder: TrackBuilder) -> (Self::Controller, TrackBuilderWrapped);
+}

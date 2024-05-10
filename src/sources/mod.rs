@@ -4,10 +4,13 @@ pub mod audio_file;
 use crate::backend::AudioBackend;
 use crate::spatial::SpatialEmitterHandle;
 
-use crate::{AudioPlaybackSet, AudioSourceSetup, AudioWorld, InternalAudioMarker};
+use crate::{
+    AudioPlaybackSet, AudioSourceSetup, AudioWorld, InternalAudioMarker, TrackBuilderWrapped,
+};
 use bevy::prelude::*;
 use kira::manager::AudioManager;
 
+use kira::track::{TrackHandle, TrackId};
 use std::fmt;
 use std::marker::PhantomData;
 
@@ -76,11 +79,12 @@ impl<T: AudioSource> Plugin for AudioSourcePlugin<T> {
 
 /// Possible output destinations for the sound. By default, it will be sent directly to the main
 /// track, but you can send it to custom tracks with optional processing on them instead.
-#[derive(Debug, Default, Component)]
+#[derive(Default, Component)]
 pub enum OutputDestination {
     /// Send the audio data to the main track (default)
     #[default]
     MainOutput,
+    SubTrack(TrackHandle),
 }
 
 /// [`Bundle`] for easy creation of audio sources.
@@ -116,25 +120,34 @@ impl<T: AudioSource> AudioSourcePlugin<T> {
         mut audio_world: ResMut<AudioWorld>,
         asset_server: Res<AssetServer>,
         assets: Res<Assets<T>>,
-        q_added: Query<
+        mut q_added: Query<
             (
                 Entity,
                 &Handle<T>,
                 &T::Settings,
                 Option<&SpatialEmitterHandle>,
-                &OutputDestination,
+                Option<&mut TrackBuilderWrapped>,
             ),
             Without<AudioHandle<T::Handle>>,
         >,
     ) {
-        for (entity, source, settings, spatial_emitter, output_destination) in &q_added {
+        for (entity, source, settings, spatial_emitter, track_builder) in &mut q_added {
             let output_destination = if let Some(emitter) = spatial_emitter {
                 kira::OutputDestination::Emitter(emitter.0.id())
             } else {
-                let output_handle = match output_destination {
-                    OutputDestination::MainOutput => &*audio_world.audio_manager.main_track(),
-                };
-                kira::OutputDestination::Track(output_handle.id())
+                let mut track_id = TrackId::Main;
+
+                if let Some(mut track_builder) = track_builder {
+                    let manager = &mut audio_world.audio_manager;
+                    let builder = std::mem::take(&mut track_builder.0);
+                    let track = manager.add_sub_track(builder).unwrap();
+                    track_id = track.id();
+                    commands
+                        .entity(entity)
+                        .insert(OutputDestination::SubTrack(track));
+                }
+
+                kira::OutputDestination::Track(track_id)
             };
             let result = match assets.get(source) {
                 Some(asset)

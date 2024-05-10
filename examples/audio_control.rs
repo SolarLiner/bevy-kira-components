@@ -2,10 +2,15 @@
 //! For loading additional audio formats, you can enable the corresponding feature for that audio format.
 
 use bevy::prelude::*;
+use kira::effect::delay::{DelayBuilder, DelayHandle};
+use kira::effect::filter::{FilterBuilder, FilterHandle};
+use kira::track::TrackBuilder;
 
 use bevy_kira_components::kira::sound::{PlaybackRate, PlaybackState};
 use bevy_kira_components::kira::tween::Tween;
 use bevy_kira_components::prelude::*;
+use bevy_kira_components::{EffectRack, TrackBuilderWrapped};
+use bevy_kira_components_derive::EffectRack;
 
 fn main() {
     App::new()
@@ -16,13 +21,23 @@ fn main() {
         .run();
 }
 
+#[derive(EffectRack)]
+struct MyEffectRack {
+    delay: DelayBuilder,
+    filter: FilterBuilder,
+}
+
 fn setup(asset_server: Res<AssetServer>, mut commands: Commands) {
     commands.spawn((
         AudioFileBundle {
             source: asset_server.load("Windless Slopes.ogg"),
             ..default()
         },
-        MyMusic,
+        MyEffectRack {
+            delay: DelayBuilder::new(),
+            filter: FilterBuilder::new().cutoff(1000.0),
+        }
+        .apply(TrackBuilder::new()),
     ));
 }
 
