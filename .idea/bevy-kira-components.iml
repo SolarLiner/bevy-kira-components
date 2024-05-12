@@ -8,6 +8,7 @@
       <sourceFolder url="file://$MODULE_DIR$/examples/spatial/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/src" isTestSource="false" />
       <sourceFolder url="file://$MODULE_DIR$/examples/custom_sound/src" isTestSource="false" />
+      <sourceFolder url="file://$MODULE_DIR$/bevy_kira_components_derive/src" isTestSource="false" />
       <excludeFolder url="file://$MODULE_DIR$/target" />
     </content>
     <orderEntry type="inheritedJdk" />
