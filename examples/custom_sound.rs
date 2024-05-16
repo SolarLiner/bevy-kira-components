@@ -8,6 +8,10 @@ use kira::tween::{Parameter, Tween, Value};
 use ringbuf::{HeapConsumer, HeapProducer, HeapRb};
 
 use bevy_kira_components::prelude::*;
+// TODO: ambiguity is with bevy which still exposes `struct AudioSource` even when the `bevy_audio` 
+// feature is off. We'll have to break the monolithic `bevy` import anyway, so this will be solved
+// then.
+use bevy_kira_components::prelude::AudioSource; 
 
 fn main() {
     App::new()
@@ -28,6 +32,7 @@ fn setup(mut commands: Commands, mut assets: ResMut<Assets<SineWave>>) {
         settings: SineWaveSettings { frequency: 440.0 },
         ..default()
     });
+}
 
 /// Enum for commands the Handle (controlled within Bevy systems) can send to the sound (in the
 /// audio thread).
@@ -71,7 +76,7 @@ impl Sound for SineWaveSound {
         dt: f64,
         clock_info_provider: &kira::clock::clock_info::ClockInfoProvider,
         modulator_value_provider: &kira::modulator::value_provider::ModulatorValueProvider,
-    ) -> kira::dsp::Frame {
+    ) -> kira::Frame {
         // Receive and perform commands
         while let Some(command) = self.commands.pop() {
             match command {
@@ -91,7 +96,7 @@ impl Sound for SineWaveSound {
         let sample = 0.125 * f32::sin(TAU * self.phase);
 
         // Return the new stereo sample
-        kira::dsp::Frame {
+        kira::Frame {
             left: sample,
             right: sample,
         }
