@@ -5,19 +5,19 @@ use std::marker::PhantomData;
 use bevy::prelude::*;
 use kira::manager::AudioManager;
 
-use crate::{AudioPlaybackSet, AudioSourceSetup, AudioWorld, InternalAudioMarker};
 use crate::backend::AudioBackend;
 use crate::spatial::SpatialEmitterHandle;
+use crate::{AudioPlaybackSet, AudioSourceSetup, AudioWorld, InternalAudioMarker};
 
 pub mod audio_file;
 
 #[doc(hidden)]
 pub mod prelude {
+    pub use super::audio_file::prelude::*;
     pub use super::{
         AudioBundle, AudioHandle, AudioSource, AudioSourcePlugin, NoAudioSettings,
         OutputDestination,
     };
-    pub use super::audio_file::prelude::*;
 }
 
 /// Trait for implementing an audio source to play in the audio engine.
