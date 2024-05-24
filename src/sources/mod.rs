@@ -1,20 +1,23 @@
 //! Implementations of different audio sources.
-pub mod audio_file;
+use std::fmt;
+use std::marker::PhantomData;
 
-use crate::backend::AudioBackend;
-use crate::spatial::SpatialEmitterHandle;
-
-use crate::{AudioPlaybackSet, AudioSourceSetup, AudioWorld, InternalAudioMarker};
 use bevy::prelude::*;
 use kira::manager::AudioManager;
 
-use std::fmt;
-use std::marker::PhantomData;
+use crate::backend::AudioBackend;
+use crate::spatial::SpatialEmitterHandle;
+use crate::{AudioPlaybackSet, AudioSourceSetup, AudioWorld, InternalAudioMarker};
+
+pub mod audio_file;
 
 #[doc(hidden)]
 pub mod prelude {
     pub use super::audio_file::prelude::*;
-    pub use super::{AudioBundle, AudioHandle, AudioSource, AudioSourcePlugin, OutputDestination};
+    pub use super::{
+        AudioBundle, AudioHandle, AudioSource, AudioSourcePlugin, NoAudioSettings,
+        OutputDestination,
+    };
 }
 
 /// Trait for implementing an audio source to play in the audio engine.
@@ -46,6 +49,10 @@ pub trait AudioSource: Asset {
         output_destination: kira::OutputDestination,
     ) -> Result<Self::Handle, Self::Error>;
 }
+
+/// Dummy struct for cases where the audio source has no settings.
+#[derive(Debug, Default, Component)]
+pub struct NoAudioSettings;
 
 /// Component holding a handle to an [`AudioSource`]. Access this component from your systems to
 /// control the parameters of the sound from Bevy.
