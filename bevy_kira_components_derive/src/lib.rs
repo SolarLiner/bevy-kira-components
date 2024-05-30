@@ -12,6 +12,7 @@ pub fn create_derive(input: TokenStream) -> TokenStream {
     impl_create(&ast)
 }
 
+#[derive(Default)]
 struct DeriveVisitor {
     field_name_idents: Vec<Ident>,
     handle_type_idents: Vec<Ident>,
@@ -41,10 +42,7 @@ fn impl_create(ast: &syn::DeriveInput) -> TokenStream {
     let rack_ident = &ast.ident;
 
     // Collect all the Fields
-    let mut visitor = DeriveVisitor {
-        field_name_idents: vec![],
-        handle_type_idents: vec![],
-    };
+    let mut visitor = DeriveVisitor::default();
     visitor.visit_derive_input(&ast);
 
     let controller_ident = Ident::new(&format!("{}Controller", rack_ident), Span::call_site());
