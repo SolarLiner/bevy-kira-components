@@ -21,11 +21,14 @@ fn main() {
         .run();
 }
 
+// #[derive(EffectRack)]
+// struct MyEffectRack {
+//     delay: DelayBuilder,
+//     filter: FilterBuilder,
+// }
+
 #[derive(EffectRack)]
-struct MyEffectRack {
-    delay: DelayBuilder,
-    filter: FilterBuilder,
-}
+struct MyEffectRack(DelayBuilder, FilterBuilder);
 
 fn setup(asset_server: Res<AssetServer>, mut commands: Commands) {
     commands.spawn((
@@ -34,8 +37,8 @@ fn setup(asset_server: Res<AssetServer>, mut commands: Commands) {
             ..default()
         },
         MyEffectRack {
-            delay: DelayBuilder::new(),
-            filter: FilterBuilder::new().cutoff(1000.0),
+            0: DelayBuilder::new(),
+            1: FilterBuilder::new().cutoff(1000.0),
         }
         .apply(TrackBuilder::new()),
     ));
