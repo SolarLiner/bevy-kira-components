@@ -59,7 +59,6 @@ fn impl_create(ast: &syn::DeriveInput) -> TokenStream {
     let struct_gen = match field_name_idents[0] {
         Member::Named(_) => {
             quote! {
-                #[derive(Component)]
                 struct #controller_ident {
                     #(#field_name_idents : #handle_type_idents),*
                 }
@@ -67,7 +66,6 @@ fn impl_create(ast: &syn::DeriveInput) -> TokenStream {
         }
         Member::Unnamed(_) => {
             quote! {
-                #[derive(Component)]
                 struct #controller_ident (
                     #(#handle_type_idents),*
                 );
@@ -91,6 +89,7 @@ fn impl_create(ast: &syn::DeriveInput) -> TokenStream {
     };
 
     let tokens = quote! {
+        #[derive(Component)]
         #struct_gen
         #impl_gen
     };
