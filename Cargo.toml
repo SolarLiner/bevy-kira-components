@@ -17,7 +17,7 @@ edition = "2021"
 [dependencies]
 bevy_math = { version = "0.14.0-rc.2", features = ["mint"] }
 cpal = "0.15.3"
-kira = { version = "0.8.6", git = "https://github.com/tesselode/kira.git", branch = "main", features = ["serde"] }
+kira = { version = "0.9.3", features = ["serde"] }
 thiserror = "1.0.57"
 serde = { version = "1.0.197", features = ["derive"] }
 
