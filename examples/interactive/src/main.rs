@@ -23,9 +23,6 @@ fn main() {
 #[derive(Component)]
 struct InteractiveSound;
 
-#[derive(Component)]
-struct PanTrack;
-
 fn init(mut commands: Commands, asset_server: Res<AssetServer>) {
     commands.spawn(Camera2dBundle { ..default() });
     let audio_file = asset_server.load::<AudioFile>("drums.ogg");
