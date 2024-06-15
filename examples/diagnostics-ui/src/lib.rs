@@ -16,7 +16,7 @@ struct DiagnosticSource(DiagnosticPath);
 fn init_ui(mut commands: Commands, diagnostics: Res<DiagnosticsStore>) {
     commands
         .spawn(NodeBundle {
-            background_color: BackgroundColor(Color::BLACK.with_a(0.4)),
+            background_color: BackgroundColor(Color::BLACK.with_alpha(0.4)),
             z_index: ZIndex::Global(i32::MAX),
             style: Style {
                 position_type: PositionType::Absolute,

@@ -1,3 +1,4 @@
+use bevy::color::palettes::css::{GRAY, GREEN};
 use bevy::prelude::*;
 
 use bevy_kira_components::kira::sound::Region;
@@ -32,7 +33,7 @@ fn init(mut commands: Commands, asset_server: Res<AssetServer>) {
         SpriteBundle {
             transform: Transform::from_scale(Vec3::splat(25.0)),
             sprite: Sprite {
-                color: Color::GRAY,
+                color: GRAY.into(),
                 ..default()
             },
             ..default()
@@ -68,12 +69,12 @@ fn handle_interactive_sound(
     if keyboard.just_pressed(KeyCode::Space) {
         for (mut handle, mut sprite) in &mut q {
             handle.resume(Tween::default());
-            sprite.color = Color::GREEN;
+            sprite.color = GREEN.into();
         }
     } else if keyboard.just_released(KeyCode::Space) {
         for (mut handle, mut sprite) in &mut q {
             handle.pause(Tween::default());
-            sprite.color = Color::GRAY;
+            sprite.color = GRAY.into();
         }
     }
 }
