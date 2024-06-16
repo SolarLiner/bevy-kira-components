@@ -53,10 +53,12 @@ impl AudioSource for AudioFile {
                 let settings = (*kira_settings)
                     .output_destination(output_destination)
                     .volume(asset_settings.volume)
+                    .playback_rate(asset_settings.playback_rate)
                     .panning(asset_settings.panning)
                     .loop_region(asset_settings.loop_region)
                     .reverse(asset_settings.reverse)
                     .start_position(asset_settings.play_region.start);
+
                 let static_data = StaticSoundData::from_cursor(Cursor::new(data.clone()))
                     .map_err(|err| {
                         PlaySoundError::IntoSoundError(AudioFileError::FromFileError(err))
@@ -81,6 +83,7 @@ impl AudioSource for AudioFile {
                 let settings = (*kira_settings)
                     .output_destination(output_destination)
                     .volume(asset_settings.volume)
+                    .playback_rate(asset_settings.playback_rate)
                     .panning(asset_settings.panning)
                     .loop_region(asset_settings.loop_region);
                 let streaming_sound_data = StreamingSoundData::from_file(path)
