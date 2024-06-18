@@ -6,7 +6,6 @@
 //! This means that the streaming feature is only available on desktop platforms, and not on the web.
 use bevy::asset::io::Reader;
 use bevy::asset::{AssetLoader, AsyncReadExt, LoadContext};
-use bevy::utils::BoxedFuture;
 use kira::sound::static_sound::StaticSoundSettings;
 use kira::sound::streaming::StreamingSoundSettings;
 use kira::sound::FromFileError;
@@ -45,27 +44,25 @@ impl AssetLoader for AudioFileLoader {
     type Settings = AudioAssetSettings;
     type Error = AudioFileLoaderError;
 
-    fn load<'a>(
+    async fn load<'a>(
         &'a self,
-        reader: &'a mut Reader,
+        reader: &'a mut Reader<'_>,
         settings: &'a AudioAssetSettings,
-        load_context: &'a mut LoadContext,
-    ) -> BoxedFuture<'a, Result<Self::Asset, Self::Error>> {
-        Box::pin(async move {
-            if settings.should_stream {
-                Ok(AudioFile::Streaming {
-                    path: load_context.path().to_path_buf(),
-                    settings: StreamingSoundSettings::new(),
-                })
-            } else {
-                let mut sound_bytes = vec![];
-                reader.read_to_end(&mut sound_bytes).await?;
-                Ok(AudioFile::Static(
-                    sound_bytes.into(),
-                    StaticSoundSettings::default(),
-                ))
-            }
-        })
+        load_context: &'a mut LoadContext<'_>,
+    ) -> Result<Self::Asset, Self::Error> {
+        if settings.should_stream {
+            Ok(AudioFile::Streaming {
+                path: load_context.path().to_path_buf(),
+                settings: StreamingSoundSettings::new(),
+            })
+        } else {
+            let mut sound_bytes = vec![];
+            reader.read_to_end(&mut sound_bytes).await?;
+            Ok(AudioFile::Static(
+                sound_bytes.into(),
+                StaticSoundSettings::default(),
+            ))
+        }
     }
 
     fn extensions(&self) -> &[&str] {

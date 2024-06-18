@@ -5,4 +5,4 @@ edition = "2021"
 publish = false
 
 [dependencies]
-bevy = { version = "0.13.0" , default-features = false,features = ["bevy_ui"] }
+bevy = { version = "0.14.0-rc.2" , default-features = false,features = ["bevy_ui"] }

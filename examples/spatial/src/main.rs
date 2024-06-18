@@ -1,3 +1,4 @@
+use bevy::color::palettes::css::{GRAY, GREEN};
 use bevy::math::vec3;
 use bevy::prelude::*;
 
@@ -78,7 +79,7 @@ fn init_objects(
                     mesh: meshes.add(Sphere::new(0.1).mesh()),
                     material: materials.add(StandardMaterial {
                         base_color: Color::WHITE,
-                        emissive: Color::GREEN,
+                        emissive: GREEN.into(),
                         ..default()
                     }),
                     transform: Transform::from_xyz(0., 0., 2.5),
@@ -90,9 +91,9 @@ fn init_objects(
     // Plane
     commands.spawn(PbrBundle {
         transform: Transform::from_scale(Vec3::splat(100.0)),
-        mesh: meshes.add(Plane3d::new(Vec3::Y).mesh()),
+        mesh: meshes.add(Plane3d::new(Vec3::Y, Vec2::ONE).mesh()),
         material: materials.add(StandardMaterial {
-            base_color: Color::GRAY,
+            base_color: GRAY.into(),
             ..default()
         }),
         ..default()
