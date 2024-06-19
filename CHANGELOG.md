@@ -5,6 +5,30 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## 0.2.0-rc.3 (2024-06-19)
+
+### New features
+
+- Add playback_rate to settings
+
+### Commit Statistics
+
+<csr-read-only-do-not-edit/>
+
+ - 1 commit contributed to the release.
+ - 0 commits were understood as [conventional](https://www.conventionalcommits.org).
+ - 1 unique issue was worked on: [#22](https://github.com/SolarLiner/bevy-kira-components/issues/22)
+
+### Commit Details
+
+<csr-read-only-do-not-edit/>
+
+<details><summary>view details</summary>
+
+ * **[#22](https://github.com/SolarLiner/bevy-kira-components/issues/22)**
+    - Add playback_rate to settings ([`a9bbbd1`](https://github.com/SolarLiner/bevy-kira-components/commit/a9bbbd197a46eb93bac183fd885fa10f9b371825))
+</details>
+
 ## 0.2.0-rc.2 (2024-06-19)
 
 <csr-id-fd0f1abb37698fb9f5bba94370378fa3083c17c2/>
@@ -51,7 +75,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <csr-read-only-do-not-edit/>
 
- - 25 commits contributed to the release over the course of 52 calendar days.
+ - 26 commits contributed to the release over the course of 52 calendar days.
  - 52 days passed between releases.
  - 16 commits were understood as [conventional](https://www.conventionalcommits.org).
  - 6 unique issues were worked on: [#14](https://github.com/SolarLiner/bevy-kira-components/issues/14), [#16](https://github.com/SolarLiner/bevy-kira-components/issues/16), [#17](https://github.com/SolarLiner/bevy-kira-components/issues/17), [#21](https://github.com/SolarLiner/bevy-kira-components/issues/21), [#7](https://github.com/SolarLiner/bevy-kira-components/issues/7), [#8](https://github.com/SolarLiner/bevy-kira-components/issues/8)
@@ -75,6 +99,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
  * **[#8](https://github.com/SolarLiner/bevy-kira-components/issues/8)**
     - Use linear attenuation in SpatialEmitter by default ([`ad090ad`](https://github.com/SolarLiner/bevy-kira-components/commit/ad090adabafcc33d7e2bb5eeaa044adcca4e3b04))
  * **Uncategorized**
+    - Add playback_rate to settings ([`4ea4855`](https://github.com/SolarLiner/bevy-kira-components/commit/4ea4855f0cc13353bb605bddeb9fd4e574941274))
     - Use `async fn` in `AudioFileLoader` ([`66ebc23`](https://github.com/SolarLiner/bevy-kira-components/commit/66ebc2312d6420b6941070c5e9a4ebae838ff794))
     - Formatting ([`fd0f1ab`](https://github.com/SolarLiner/bevy-kira-components/commit/fd0f1abb37698fb9f5bba94370378fa3083c17c2))
     - Custom sound documentation in example ([`8f3087c`](https://github.com/SolarLiner/bevy-kira-components/commit/8f3087cf9a1094cc13c472c82ec7c77fda191cbc))
