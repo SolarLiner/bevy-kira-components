@@ -107,6 +107,11 @@ pub struct AudioFileSettings {
     pub start_paused: bool,
     /// Volume at which the audio will play at.
     pub volume: f64,
+    /// The playback rate of the sound.
+    ///
+    /// Changing the playback rate changes both the speed and the pitch of the
+    /// sound.
+    pub playback_rate: f64,
     /// Panning (in 0..=1) for the sound, where 0 is hard left, and 1 is hard right.
     pub panning: f64,
     /// Optionally loop a region of the sound (given in seconds)
@@ -123,6 +128,7 @@ impl Default for AudioFileSettings {
         Self {
             start_paused: false,
             volume: 1.0,
+            playback_rate: 1.0,
             panning: 0.5,
             loop_region: None,
             play_region: Region::from(..),
