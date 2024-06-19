@@ -5,7 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## 0.2.0-rc.2
+## 0.2.0-rc.2 (2024-06-19)
+
+<csr-id-fd0f1abb37698fb9f5bba94370378fa3083c17c2/>
+<csr-id-54d0eeaf839e7215afb0d1f579440551c48e2a62/>
+<csr-id-743a7622a259ade966331f125b3bace501f808da/>
+<csr-id-359093ac9e1e6e2f0151cfb99613bb6eadacbabd/>
+<csr-id-8f3087cf9a1094cc13c472c82ec7c77fda191cbc/>
+<csr-id-d7579f2ab70e609c111bd4ffd6d3bba91f47b064/>
+<csr-id-5a0e9278eae2a1c7c76f81647d494267afafc51f/>
+<csr-id-2f45da39069e15f1a790572b085c346027b966c6/>
 
 ### Chore
 
@@ -42,8 +51,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 <csr-read-only-do-not-edit/>
 
- - 25 commits contributed to the release over the course of 50 calendar days.
- - 50 days passed between releases.
+ - 25 commits contributed to the release over the course of 52 calendar days.
+ - 52 days passed between releases.
  - 16 commits were understood as [conventional](https://www.conventionalcommits.org).
  - 6 unique issues were worked on: [#14](https://github.com/SolarLiner/bevy-kira-components/issues/14), [#16](https://github.com/SolarLiner/bevy-kira-components/issues/16), [#17](https://github.com/SolarLiner/bevy-kira-components/issues/17), [#21](https://github.com/SolarLiner/bevy-kira-components/issues/21), [#7](https://github.com/SolarLiner/bevy-kira-components/issues/7), [#8](https://github.com/SolarLiner/bevy-kira-components/issues/8)
 
@@ -92,6 +101,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## v0.1.0 (2024-04-28)
 
 ## v0.1.0-rc.0 (2024-04-28)
+
+<csr-id-b6e64ddea63a51254ed4f02d2b6127b8b1035bfe/>
+<csr-id-64a30935c5875f213d76ab70e1357f0352602d5b/>
+<csr-id-70fbdded7a3e66031425c69bccc5adf71d700db4/>
+<csr-id-6f91bc8af5a099917ec45b4614aa3fbfd8260ac0/>
+<csr-id-ad7dbf94352b4537fcf3a62fc0448edc0bd10770/>
+<csr-id-a2f3a979cda9c171782f877bc2681beb6bb12c57/>
+<csr-id-415970c56598b36e0c5701578b4308fe3ccac4d9/>
+<csr-id-bdf1bce6bd58280199e795d818b701a07b537e08/>
+<csr-id-74924f76ff38c9cef5960a5800d7db0a59ceeaf0/>
+<csr-id-e65b6e853bd31aac94a089bd8276d8b2fdc2b509/>
+<csr-id-e4777a76c8442eb6fb3b935585ac8bd34f1543f0/>
+<csr-id-953647b94863fd01436a13a46ed18f39a54e02ba/>
+<csr-id-8b818f1de215c53e8ba5f79147608e529a2ee163/>
 
 ### Chore
 
