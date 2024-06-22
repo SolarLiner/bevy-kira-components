@@ -77,6 +77,7 @@ fn on_audio_file_ended(
             match end_behavior.copied().unwrap_or_default() {
                 AudioFileEndBehavior::Nothing => {}
                 AudioFileEndBehavior::RemoveComponents => {
+                    info!("Removing audio components from entity {:?}", entity);
                     commands.entity(entity).remove::<AudioFileBundle>();
                 }
                 AudioFileEndBehavior::Despawn { recursive } => {
