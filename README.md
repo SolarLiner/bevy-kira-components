@@ -1,3 +1,6 @@
+> [!CAUTION]
+> This project has now been archived, as work has moved to an entirely new audio engine for Bevy (see <https://github.com/corvusprudens/bevy_seedling>).
+
 # Bevy <-> Kira as Components
 
 ![Crates.io Version](https://img.shields.io/crates/v/bevy-kira-components)
